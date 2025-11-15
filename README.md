@@ -1,91 +1,56 @@
-# Uhmbrella AIMD API SDK
+# Uhmbrella AIMD API – CLI and HTTP reference
 
-Python CLI client for the [Uhmbrella](https://uhmbrella.io) AI music detection API.
+This document describes how to use the `uhmbrella-api` Python package via:
 
-This package installs a single command:
+- The CLI command: `uhmbrella-api`
+- The equivalent raw HTTP API calls (for curl or backend use)
 
-```bash
-uhmbrella-api
-```
+It only covers behaviour that exists in the current `cli.py`.
 
-which wraps the public HTTP API for:
-
-- Checking quota usage
-- Synchronous scans (single file or small folder)
-- Creating async bulk jobs
-- Checking job status and fetching results
-- Cancelling jobs
-
-Uploads show a `tqdm` progress bar based on total bytes sent.
-
----
-
-## Requirements
-
-- Python **3.9+**
-- A valid Uhmbrella API key
-
-Default API base URL:
+Default base URL:
 
 ```text
 https://api.uhmbrella.io
 ```
 
-You can override this with `--api-base` or `UHM_API_BASE`.
+You can override this with:
+
+- `--api-base https://your-api-host`
+- or environment variable `UHM_API_BASE`
+
+All public endpoints require:
+
+```http
+x-api-key: YOUR_API_KEY
+```
+
+You can supply the API key either as a CLI flag or via environment variable.
 
 ---
 
-## Installation
+## 0. Authentication and globals
 
-### From PyPI (recommended)
+### CLI
+
+You can pass the API key directly:
 
 ```bash
-pip install uhmbrella-api
+uhmbrella-api --api-key YOUR_API_KEY usage
 ```
 
-This installs the console script:
+Or set an environment variable:
 
 ```bash
-uhmbrella-api
-```
-
-### From source (editable)
-
-```bash
-git clone https://github.com/TtesseractT/uhmbrella-api.git
-cd uhmbrella-api
-
-# (optional but recommended) create and activate a virtualenv
-
-pip install -e .
-```
-
----
-
-## Authentication
-
-You need an API key from Uhmbrella.
-
-You can pass it directly on each call:
-
-```bash
-uhmbrella-api --api-key UHM-XXXX-XXXX usage
-```
-
-or set it as an environment variable:
-
-```bash
-export UHM_API_KEY="UHM-XXXX-XXXX"
+export UHM_API_KEY="YOUR_API_KEY"
 uhmbrella-api usage
 ```
 
-There is also a helper to show OS-specific commands:
+The CLI understands the following global options:
 
-```bash
-uhmbrella-api env --api-key UHM-XXXX-XXXX
-```
+- `--api-key`  - API key for auth (or set `UHM_API_KEY`)
+- `--api-base` - override the API base URL
 
-The CLI accepts global flags (`--api-key`, `--api-base`) **anywhere** in the command. These are normalised internally, so all of the following are equivalent:
+These flags can appear anywhere in the command. For example, all of these are equivalent:
 
 ```bash
 uhmbrella-api --api-key KEY usage
@@ -93,31 +58,13 @@ uhmbrella-api usage --api-key KEY
 uhmbrella-api usage --api-key=KEY
 ```
 
----
-
-## CLI overview
-
-General form:
-
-```bash
-uhmbrella-api [--api-key KEY] [--api-base URL] <command> [subcommand] [options]
-```
-
-Commands:
-
-- `usage`
-- `scan`
-- `jobs create`
-- `jobs status`
-- `jobs results`
-- `jobs cancel`
-- `env`
+The CLI normalises the arguments before parsing.
 
 ---
 
 ## 1. Check usage
 
-Shows remaining quota for the current API key.
+Shows current quota and usage for the API key.
 
 ### CLI
 
@@ -125,23 +72,37 @@ Shows remaining quota for the current API key.
 uhmbrella-api usage --api-key YOUR_API_KEY
 ```
 
-### HTTP (equivalent)
+### HTTP
 
 ```bash
-curl "https://api.uhmbrella.io/usage" \
-  -H "x-api-key: YOUR_API_KEY"
+curl "https://api.uhmbrella.io/usage" -H "x-api-key: YOUR_API_KEY"
+```
+
+The response is a JSON object similar to:
+
+```json
+{
+  "user_id": "test_user",
+  "plan_name": "trial_100min",
+  "quota_seconds": 6000,
+  "used_seconds": 765,
+  "remaining_seconds": 5235
+}
 ```
 
 ---
 
 ## 2. Synchronous scan
 
-`scan` uploads audio for immediate processing.
+The `scan` command uploads audio for immediate analysis.
 
-- If `--input` is a **file**, it calls `POST /v1/analyze`.
-- If `--input` is a **directory**, it calls `POST /v1/analyze-batch` for up to 40 files, then writes one JSON per file.
+Behaviour:
 
-Uploads display a `tqdm` progress bar.
+- If `--input` points to a single file, the CLI calls `POST /v1/analyze`.
+- If `--input` points to a directory, the CLI calls `POST /v1/analyze-batch` for up to 40 files.
+- Results are written as JSON files in the chosen output directory.
+
+During upload, a `tqdm` progress bar shows bytes sent.
 
 ### 2.1 Single file
 
@@ -150,161 +111,221 @@ Results are saved as `<output-dir>/<filename>.analysis.json`.
 #### CLI
 
 ```bash
-uhmbrella-api scan \
-  --input "/path/to/audio.mp3" \
-  --output-dir "./uhm_results" \
-  --api-key YOUR_API_KEY
+uhmbrella-api scan --input "/path/to/audio.mp3" --output-dir "./uhm_results" --api-key YOUR_API_KEY
 ```
+
+Key options:
+
+- `--input`      - path to an audio file
+- `--output-dir` - directory to write JSON results (default `./uhm_results`)
 
 #### HTTP
 
 ```bash
-curl -X POST "https://api.uhmbrella.io/v1/analyze" \
-  -H "x-api-key: YOUR_API_KEY" \
-  -F "file=@/path/to/audio.mp3"
+curl -X POST "https://api.uhmbrella.io/v1/analyze" -H "x-api-key: YOUR_API_KEY" -F "file=@/path/to/audio.mp3"
 ```
 
+The HTTP response is a single analysis object that includes:
+
+- predicted class percentages
+- segments and segmentsVox arrays
+- audio length and billed seconds
+- usage details for the API key
+
 ### 2.2 Small folder (up to 40 files)
+
+If the input is a folder, the CLI will:
+
+- collect audio files based on patterns
+- upload them in a batch to `/v1/analyze-batch`
+- write one JSON result per file
+
+If more than 40 files are found, the CLI exits with an error and asks you to use `jobs create` instead.
 
 #### CLI
 
 ```bash
-uhmbrella-api scan \
-  --input "./audio_folder" \
-  --output-dir "./uhm_results" \
-  --api-key YOUR_API_KEY
+uhmbrella-api scan --input "./audio_folder" --output-dir "./uhm_results" --recursive --api-key YOUR_API_KEY
 ```
 
-Extra options:
+Options:
 
-- `--recursive` – recurse into subdirectories
-- `--patterns` – override file patterns  
-  (default: `*.mp3 *.wav *.flac *.m4a`)
+- `--input`      - directory containing audio files
+- `--output-dir` - directory to write JSON results
+- `--recursive`  - recurse into subdirectories
+- `--patterns`   - override patterns, for example:
+  ```bash
+  --patterns "*.wav" "*.flac"
+  ```
 
-The CLI calls `POST /v1/analyze-batch` and writes one `.analysis.json` per input file.
+Default patterns are:
+
+```text
+*.mp3 *.wav *.flac *.m4a
+```
 
 #### HTTP
 
 ```bash
-curl -X POST "https://api.uhmbrella.io/v1/analyze-batch" \
-  -H "x-api-key: YOUR_API_KEY" \
-  -F "files=@/path/to/track1.wav" \
-  -F "files=@/path/to/track2.mp3"
+curl -X POST "https://api.uhmbrella.io/v1/analyze-batch" -H "x-api-key: YOUR_API_KEY" -F "files=@/path/to/track1.wav" -F "files=@/path/to/track2.mp3"
 ```
 
-If more than 40 files are found, the CLI refuses and tells you to use `jobs create` instead.
+The response contains:
+
+- `results` - list of per file analysis objects
+- `usage`   - updated usage summary
+
+Each result item has the same shape as a single file analysis.
 
 ---
 
 ## 3. Create async job
 
-For larger batches, use the jobs API. Files are uploaded once, then processed in the background.
+For larger sets of files, the CLI supports async jobs via the `/v1/jobs` endpoint. Files are uploaded once and processed in the background.
 
 ### CLI
 
 ```bash
-uhmbrella-api jobs create \
-  --input "./audio_folder" \
-  --recursive \
-  --api-key YOUR_API_KEY
+uhmbrella-api jobs create --input "./audio_folder" --recursive --api-key YOUR_API_KEY
 ```
 
 Options:
 
-- `--input` – file or directory
-- `--recursive` – recurse directories
-- `--patterns` – custom patterns (same defaults as `scan`)
+- `--input`     - file or directory
+- `--recursive` - recurse into directories when `--input` is a folder
+- `--patterns`  - override default file patterns
 
-Uploads show a `tqdm` progress bar for total bytes.
+Example with custom patterns:
+
+```bash
+uhmbrella-api jobs create --input "./audio_folder" --recursive --patterns "*.wav" "*.flac" --api-key YOUR_API_KEY
+```
+
+The CLI prints the JSON response and, if possible, a convenient reminder of follow up commands, for example:
+
+```text
+[JOB CREATED]
+{
+  "job_id": "7f3f696c-8052-43f8-a5c5-08b3767b030e",
+  "status": "queued",
+  "total_files": 123,
+  ...
+}
+
+You can now run:
+  uhmbrella-api jobs status --job-id 7f3f696c-8052-43f8-a5c5-08b3767b030e
+  uhmbrella-api jobs results --job-id 7f3f696c-8052-43f8-a5c5-08b3767b030e --output-dir ./results
+```
+
+Uploads use `tqdm` to show total bytes sent.
 
 ### HTTP
 
 ```bash
-curl -X POST "https://api.uhmbrella.io/v1/jobs" \
-  -H "x-api-key: YOUR_API_KEY" \
-  -F "files=@/path/to/track1.wav" \
-  -F "files=@/path/to/track2.wav"
+curl -X POST "https://api.uhmbrella.io/v1/jobs" -H "x-api-key: YOUR_API_KEY" -F "files=@/path/to/track1.wav" -F "files=@/path/to/track2.wav"
 ```
 
-The response includes a `job_id` you can use with the next commands.
+The HTTP response includes at least:
+
+- `job_id`
+- `status`
+- `total_files`
+- fields relating to billed and remaining seconds
 
 ---
 
 ## 4. Job status
 
-Check progress of a job.
+Check the status and progress of a previously created job.
 
 ### CLI
 
 ```bash
-uhmbrella-api jobs status \
-  --job-id JOB_ID \
-  --api-key YOUR_API_KEY
+uhmbrella-api jobs status --job-id JOB_ID --api-key YOUR_API_KEY
 ```
 
-Prints the JSON returned by the API.
+The CLI prints the JSON returned by the API.
 
 ### HTTP
 
 ```bash
-curl "https://api.uhmbrella.io/v1/jobs/JOB_ID/status" \
-  -H "x-api-key: YOUR_API_KEY"
+curl "https://api.uhmbrella.io/v1/jobs/JOB_ID/status" -H "x-api-key: YOUR_API_KEY"
 ```
+
+The response includes fields such as:
+
+- `job_id`
+- `status` (for example queued, processing, done, error, cancelling, cancelled)
+- `total_files`
+- counts per status
+- quota and usage information
 
 ---
 
 ## 5. Job results
 
-Fetch per-file results for a completed (or partially completed) job.
+Fetch per file results for a job. The CLI can either print the full JSON or write individual result files to disk.
 
 ### CLI
 
 ```bash
-uhmbrella-api jobs results \
-  --job-id JOB_ID \
-  --output-dir "./results" \
-  --api-key YOUR_API_KEY
+uhmbrella-api jobs results --job-id JOB_ID --output-dir "./results" --api-key YOUR_API_KEY
 ```
 
 Behaviour:
 
-- Always prints a summary with `job_id`, `status`, and `results_count`.
-- If `--output-dir` is omitted, prints the full raw JSON and exits.
+- Always prints a summary to stdout:
+  - `job_id`
+  - `status`
+  - `results_count`
+- If `--output-dir` is omitted:
+  - prints the full raw JSON to stdout and exits.
 - If `--output-dir` is provided:
-  - Writes `<filename>.analysis.json` for files with `status="done"`.
-  - Writes `<filename>.error.json` for files with any other status.
+  - creates the directory if needed
+  - for each item in `results`:
+    - if `status == "done"`, writes `<filename>.analysis.json`
+    - otherwise, writes `<filename>.error.json`
+
+This lets you separate successful analyses from errors.
 
 ### HTTP
 
 ```bash
-curl "https://api.uhmbrella.io/v1/jobs/JOB_ID/results" \
-  -H "x-api-key: YOUR_API_KEY"
+curl "https://api.uhmbrella.io/v1/jobs/JOB_ID/results" -H "x-api-key: YOUR_API_KEY"
 ```
 
-Each successful result has the same shape as a single `/v1/analyze` response.
+The response JSON includes:
+
+- overall `job_id` and `status`
+- `results`: a list where each item contains:
+  - `filename`
+  - `status`
+  - possibly `error`
+  - `result` (same shape as `/v1/analyze`) when status is done
 
 ---
 
 ## 6. Cancel job
 
-Request cancellation of a long running job. Cancellation is cooperative: the worker finishes the current file then stops.
+Request cooperative cancellation of a long running job. The worker finishes the current file then stops.
 
 ### CLI
 
 ```bash
-uhmbrella-api jobs cancel \
-  --job-id JOB_ID \
-  --api-key YOUR_API_KEY
+uhmbrella-api jobs cancel --job-id JOB_ID --api-key YOUR_API_KEY
 ```
+
+The CLI prints the JSON response from the API.
 
 ### HTTP
 
 ```bash
-curl -X POST "https://api.uhmbrella.io/v1/jobs/JOB_ID/cancel" \
-  -H "x-api-key: YOUR_API_KEY"
+curl -X POST "https://api.uhmbrella.io/v1/jobs/JOB_ID/cancel" -H "x-api-key: YOUR_API_KEY"
 ```
 
-If accepted:
+Typical responses:
+
+If cancellation is accepted:
 
 ```json
 {
@@ -313,31 +334,32 @@ If accepted:
 }
 ```
 
-If the job is already finished or cancelled, you get its current status instead (for example `"done"` or `"cancelled"`).
+If the job has already finished or been cancelled, you get its current status instead, for example:
+
+```json
+{
+  "job_id": "JOB_ID",
+  "status": "done"
+}
+```
+
+or
+
+```json
+{
+  "job_id": "JOB_ID",
+  "status": "cancelled"
+}
+```
 
 ---
 
 ## 7. Environment helper
 
-Show commands to set `UHM_API_KEY` in your current OS:
+The `env` subcommand prints OS specific commands for setting your API key in the environment.
+
+### CLI
 
 ```bash
 uhmbrella-api env --api-key YOUR_API_KEY
 ```
-
-- On Windows it prints a `setx` command.
-- On Linux / macOS it prints an `export` command and a note about adding it to your shell profile.
-
----
-
-## Contributing
-
-Pull requests and issues are welcome.
-
-Please keep CLI options and documentation in sync.
-
----
-
-## Licence
-
-See the [`LICENSE`](LICENSE) file in this repository.
