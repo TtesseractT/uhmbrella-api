@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "uhmbrella-api"
-version = "0.1.3"
+version = "0.2.0"
 description = "Uhmbrella AIMD - client SDK and CLI for the Uhmbrella AI music detection API."
 authors = [
   { name = "Uhmbrella", email = "hello@uhmbrella.io" }

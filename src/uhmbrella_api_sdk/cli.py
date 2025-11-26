@@ -10,6 +10,9 @@ from tqdm import tqdm
 
 
 DEFAULT_API_BASE = os.environ.get("UHM_API_BASE", "https://api.uhmbrella.io")
+import math  # new
+
+CHUNK_SIZE = 50 * 1024 * 1024  # 50 MB
 
 
 # -------------------- Helpers --------------------
@@ -114,15 +117,16 @@ def build_files_payload_with_progress(
         def __init__(self, f):
             self._f = f
 
-        def read(self, n):
+        def read(self, n=-1):
+            # requests may call read() with no argument OR with n
             data = self._f.read(n)
             if data:
                 pbar.update(len(data))
             return data
 
         def __getattr__(self, name):
-            # Delegate everything else to the underlying file (e.g. fileno, tell, seek)
             return getattr(self._f, name)
+
 
     opened_files = []
     files_payload = []
@@ -280,11 +284,14 @@ def cmd_scan(args) -> None:
         print("\n[USAGE]")
         print_json(usage)
 
-
 def cmd_jobs_create(args) -> None:
     """
-    Create a bulk job:
-      uhmbrella-api jobs create --input ./audio_dir
+    Create a bulk job with chunked uploads (50 MB per HTTP request):
+
+      1) POST /v1/jobs/init               -> job_id
+      2) For each file, stream chunks to
+         POST /v1/jobs/{job_id}/upload-chunk
+      3) POST /v1/jobs/{job_id}/finalize  -> create DB job & queue processing
     """
     api_key = resolve_api_key(args)
     api_base = resolve_api_base(args)
@@ -301,43 +308,121 @@ def cmd_jobs_create(args) -> None:
         print(f"ERROR: No matching audio files found in {input_path}", file=sys.stderr)
         sys.exit(1)
 
-    print(f"[INFO] Found {len(files_list)} audio files. Creating job...")
+    print(f"[INFO] Found {len(files_list)} audio files. Creating job (chunked uploads)...")
 
-    url = f"{api_base}/v1/jobs"
     headers = {"x-api-key": api_key}
 
-    files_payload, opened_files, pbar = build_files_payload_with_progress(
-        files_list,
-        field_name="files",
-        desc="Uploading job files",
-    )
-
-    try:
-        resp = requests.post(url, headers=headers, files=files_payload, timeout=3600)
-    finally:
-        for f in opened_files:
-            try:
-                f.close()
-            except Exception:
-                pass
-        pbar.close()
-
+    # --- Step 1: init job on server ---
+    init_url = f"{api_base}/v1/jobs/init"
+    resp = requests.post(init_url, headers=headers, timeout=60)
     if resp.status_code != 200:
         print(f"ERROR: {resp.status_code} {resp.text}", file=sys.stderr)
         sys.exit(1)
 
-    data = resp.json()
-    print("[JOB CREATED]")
-    print_json(data)
+    init_data = resp.json()
+    job_id = init_data.get("job_id")
+    if not job_id:
+        print("ERROR: /v1/jobs/init did not return job_id", file=sys.stderr)
+        sys.exit(1)
 
-    job_id = data.get("job_id")
-    if job_id:
-        print(
-            f"\nYou can now run:\n  uhmbrella-api jobs status --job-id {job_id}\n"
-            f"  uhmbrella-api jobs results --job-id {job_id} --output-dir ./results"
-        )
-    else:
-        print("[WARN] No job_id returned from server.")
+    # Compute total bytes for progress bar
+    total_bytes = 0
+    for p in files_list:
+        try:
+            total_bytes += p.stat().st_size
+        except OSError:
+            pass
+
+    pbar = tqdm(
+        total=total_bytes,
+        unit="B",
+        unit_scale=True,
+        unit_divisor=1024,
+        desc="Uploading job files (chunked)",
+        disable=(total_bytes == 0),
+    )
+
+    try:
+        # --- Step 2: upload each file in 50 MB chunks ---
+        for p in files_list:
+            try:
+                file_size = p.stat().st_size
+            except OSError:
+                print(f"[WARN] Cannot stat file, skipping: {p}", file=sys.stderr)
+                continue
+
+            total_chunks = max(1, math.ceil(file_size / CHUNK_SIZE))
+            chunk_index = 0
+
+            with p.open("rb") as f:
+                while True:
+                    chunk = f.read(CHUNK_SIZE)
+                    if not chunk:
+                        break
+
+                    upload_url = f"{api_base}/v1/jobs/{job_id}/upload-chunk"
+                    params = {
+                        "filename": p.name,
+                        "index": chunk_index,
+                        "total": total_chunks,
+                    }
+
+                    try:
+                        resp = requests.post(
+                            upload_url,
+                            headers=headers,
+                            params=params,
+                            data=chunk,
+                            timeout=3600,
+                        )
+                    except requests.exceptions.SSLError as e:
+                        print(
+                            "ERROR: TLS/SSL error while uploading chunk.\n"
+                            f"Details: {e}",
+                            file=sys.stderr,
+                        )
+                        sys.exit(1)
+
+                    if resp.status_code != 200:
+                        print(
+                            f"ERROR uploading chunk for {p.name}: "
+                            f"{resp.status_code} {resp.text}",
+                            file=sys.stderr,
+                        )
+                        sys.exit(1)
+
+                    pbar.update(len(chunk))
+                    chunk_index += 1
+
+        pbar.close()
+
+        # --- Step 3: finalize job on server ---
+        finalize_url = f"{api_base}/v1/jobs/{job_id}/finalize"
+        resp = requests.post(finalize_url, headers=headers, timeout=3600)
+
+        if resp.status_code != 200:
+            print(f"ERROR: {resp.status_code} {resp.text}", file=sys.stderr)
+            sys.exit(1)
+
+        data = resp.json()
+        print("[JOB CREATED]")
+        print_json(data)
+
+        job_id_resp = data.get("job_id") or job_id
+        if job_id_resp:
+            print(
+                f"\nYou can now run:\n"
+                f"  uhmbrella-api jobs status  --job-id {job_id_resp}\n"
+                f"  uhmbrella-api jobs results --job-id {job_id_resp} --output-dir ./results"
+            )
+        else:
+            print("[WARN] No job_id returned from server.")
+
+    finally:
+        try:
+            pbar.close()
+        except Exception:
+            pass
 
 
 def cmd_jobs_status(args) -> None:
