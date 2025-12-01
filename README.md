@@ -1,6 +1,15 @@
 # Uhmbrella AIMD API – CLI and HTTP reference
 
-This document describes how to use the `uhmbrella-api` Python package via:
+This document describes how to use the `uhmbrella-api` Python package via: 
+https://pypi.org/project/uhmbrella-api/
+
+### Setup
+
+You can install the SDK directly:
+
+```bash
+pip install uhmbrella-api
+```
 
 - The CLI command: `uhmbrella-api`
 - The equivalent raw HTTP API calls (for curl or backend use)
