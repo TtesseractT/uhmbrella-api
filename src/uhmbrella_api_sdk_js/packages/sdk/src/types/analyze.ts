@@ -54,3 +54,6 @@ export type AnalyzeFileInput = {
   file: Blob | File;
   file_name?: string;
 };
+
+export type FileUploadCallback = (filename: string, sent: number, total: number) => void;
+

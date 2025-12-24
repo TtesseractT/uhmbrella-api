@@ -1,3 +1,4 @@
+import { createUhmbrellaClient } from "../client";
 import { ClientConfigSchema } from "../schemas/clientConfig.schema";
 
 export type UhmbrellaClientConfig = {
@@ -11,3 +12,6 @@ export type UhmbrellaClientConfig = {
 };
 
 export type ParsedUhmbrellaClientConfig = ReturnType<typeof ClientConfigSchema.parse>;
+
+
+export type UhmbrellaSDK = ReturnType<typeof createUhmbrellaClient>;

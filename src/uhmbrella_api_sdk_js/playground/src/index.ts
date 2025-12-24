@@ -1,4 +1,5 @@
 import {
+  type AnalyzeResponse,
   ApiError,
   type CreateJobInput,
   createUhmbrellaClientSafe,
@@ -7,9 +8,11 @@ import {
   type JobResultsResponse,
   type UhmbrellaClientConfig,
   UhmbrellaClientError,
+  type UhmbrellaSDK,
+  UhmbrellaSDKError,
   type UsageInfo
 } from "@uhmbrella/sdk";
-import { loadAudioFilesFromDirectory, type AudioFile } from "@uhmbrella/sdk-node";
+import { loadAudio, loadAudioFilesFromDirectory, type AudioFile } from "@uhmbrella/sdk-node";
 import "dotenv/config";
 
 /**
@@ -24,18 +27,21 @@ import "dotenv/config";
 async function main() {
   try {
 
+    /*Creating the Uhmbrella Client with config options*/
     const config: UhmbrellaClientConfig = {
       api_key: process.env.API_KEY!,
       // base_url: "",
       // jobs: {
       //   chunk_size: 20 * 1024 * 1024 // default is 50 * 1024 * 1024
       // }
+      // f_fetch:  // You can use your own fetch library, but it has to conform to the WHATWG Fetch API. It should also return the Response object.
     }
+
     /*
     * There are two functions to create an Uhmbrella client, the safe version like below pings the /usage endpoint to check if the api key actually belongs to an user or not.
     * The 'unsafe' one, createUhmbrellaClient, does not do this. But both of them run a runtime validation check, which checks if the API key is atleast 21 characters long.
     * **/
-    const client = await createUhmbrellaClientSafe(config);
+    const client: UhmbrellaSDK = await createUhmbrellaClientSafe(config);
 
     /**
          * Below is how you use the Jobs API.
@@ -43,8 +49,11 @@ async function main() {
          * */
     const files: AudioFile[] = loadAudioFilesFromDirectory('./', { recursive: false });
 
+    /*Or load a single file*/
+    // const { file, file_name } = loadAudio('./audio.mp3');
+
     /**
-    * creating an object with a callback function which will be called in jobs.create() function whenever a chunk or a file has been uploaded.
+    * creating a job object with a callback function which will be called inside the jobs.create() function whenever a chunk or a file has been uploaded.
     * */
     const job_input: CreateJobInput = {
       files,
@@ -61,10 +70,10 @@ async function main() {
     console.log("Job status: ", JSON.stringify(job_status));
 
     const job_result: JobResultsResponse = await client.jobs.results(job.job_id);
-    const job_cancel: JobCancelResponse = await client.jobs.cancel(job.job_id);
+    // const job_cancel: JobCancelResponse = await client.jobs.cancel(job.job_id);
 
     console.log("Job Result: ", JSON.stringify(job_result));
-    console.log("Job cancel response: ", JSON.stringify(job_cancel));
+    // console.log("Job cancel response: ", JSON.stringify(job_cancel));
 
     /**
      * Getting usage info
@@ -73,16 +82,15 @@ async function main() {
     console.log("User usage: ", usageInfo);
 
     /**
-     * Below commented out is how you load a single file in node.js and pass it to the analyze function.
+     * Synchrnous API
      * */
-    // const file = fileFromPath("./audio.mp3");
-    //
-    // const result: AnalyzeResponse = await client.analyze.analyze(file, "test_audio");
+    // const result: AnalyzeResponse = await client.analyze.analyze(file, file_name);
+    // const result: AnalyzeResponse = await client.analyze.analyze(files);
     // console.log(result);
 
 
   } catch (error) {
-    if (error instanceof ApiError || error instanceof UhmbrellaClientError) {
+    if (error instanceof UhmbrellaSDKError) {
       console.error(error.name, ":", error.message);
     }
   }

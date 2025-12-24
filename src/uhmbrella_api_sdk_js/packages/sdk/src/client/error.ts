@@ -1,12 +1,13 @@
+import { UhmbrellaSDKError } from "../error";
+
 export type UhmbrellaClientConfigErrorParams = {
   message: string;
 };
 
-export class UhmbrellaClientError extends Error {
+export class UhmbrellaClientError extends UhmbrellaSDKError {
 
   constructor(params: UhmbrellaClientConfigErrorParams) {
-    super(params.message);
-    this.name = "Client configuation validation error";
+    super({ message: params.message, name: "Client configuation validation error" });
   }
 }
 

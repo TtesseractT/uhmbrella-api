@@ -16,14 +16,10 @@ const DEFAULT_AUDIO_EXTENSIONS = new Set([
 /**
  * Load audio files from a directory and return SDK-ready File objects.
  */
-export function loadAudioFilesFromDirectory(
-  dirPath: string,
-  options: LoadAudioFilesOptions = {}
-): AudioFile[] {
-  const {
-    recursive = false,
-    extensions = Array.from(DEFAULT_AUDIO_EXTENSIONS)
-  } = options;
+export function loadAudioFilesFromDirectory(dirPath: string, options: LoadAudioFilesOptions = {}): AudioFile[] {
+
+  const { recursive = false,
+    extensions = Array.from(DEFAULT_AUDIO_EXTENSIONS) } = options;
 
   const extSet = new Set(
     extensions.map(ext =>
@@ -53,15 +49,10 @@ export function loadAudioFilesFromDirectory(
 
       const buffer = fs.readFileSync(fullPath);
 
-      const file = new File(
-        [buffer],
-        entry.name,
-        { type: "application/octet-stream" }
-      );
+      const file = new File([buffer], entry.name, { type: "application/octet-stream" });
 
       results.push({
-        file,
-        file_name: entry.name
+        file, file_name: entry.name
       });
     }
   }

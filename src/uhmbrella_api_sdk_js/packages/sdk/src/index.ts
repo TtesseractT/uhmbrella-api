@@ -1,6 +1,7 @@
 export { createUhmbrellaClient, createUhmbrellaClientSafe } from "./client";
 
 export type {
+  UhmbrellaSDK,
   UhmbrellaClientConfig,
   ParsedUhmbrellaClientConfig,
   UsageInfo,
@@ -14,6 +15,7 @@ export type {
 } from "./types/";
 
 // errors
+export { UhmbrellaSDKError } from "./error"
 export { ApiError } from "./http/errors"
 export { UhmbrellaClientError } from "./client/"
 
