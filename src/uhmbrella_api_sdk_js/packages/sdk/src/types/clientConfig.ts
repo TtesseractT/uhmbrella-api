@@ -1,5 +1,4 @@
 import { createUhmbrellaClient } from "../client";
-import { ClientConfigSchema } from "../schemas/clientConfig.schema";
 
 export type UhmbrellaClientConfig = {
   api_key: string;
@@ -11,7 +10,12 @@ export type UhmbrellaClientConfig = {
   f_fetch?: typeof fetch;
 };
 
-export type ParsedUhmbrellaClientConfig = ReturnType<typeof ClientConfigSchema.parse>;
-
+export type UhmbrellaClientConfigResolved = Omit<UhmbrellaClientConfig, "jobs" | "base_url" | "f_fetch"> & {
+  base_url: string;
+  f_fetch: typeof fetch;
+  jobs: {
+    chunk_size: number;
+  };
+};
 
 export type UhmbrellaSDK = ReturnType<typeof createUhmbrellaClient>;
