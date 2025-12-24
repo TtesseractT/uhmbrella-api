@@ -1,0 +1,18 @@
+{
+  "name": "uhmbrella-playground",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "ts-node src/index.ts"
+  },
+  "dependencies": {
+    "@uhmbrella/sdk": "workspace:*",
+    "@uhmbrella/sdk-node": "workspace:*",
+    "dotenv": "^17.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "^25.0.3",
+    "ts-node": "^10.9.0",
+    "typescript": "^5.4.0"
+  }
+}
