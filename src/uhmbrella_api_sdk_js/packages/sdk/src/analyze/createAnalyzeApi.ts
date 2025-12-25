@@ -3,6 +3,7 @@ import { UhmbrellaSDKError } from "../error";
 import { HttpClient } from "../http/createHttpClient";
 import { AnalyzeFileInput, AnalyzeResponse } from "../types/";
 import { f_getTotalBytes } from "../utils";
+import { f_resolveAnalyzeResponse } from "./analyze.assert";
 
 const createAnalyzeApi = (httpClient: HttpClient) => {
 
@@ -54,8 +55,22 @@ const createAnalyzeApi = (httpClient: HttpClient) => {
     return f_analyze_File(arg1, file_name);
   }
 
+
+  async function f_analyzeSafe(file: Blob | File, file_name?: string): Promise<AnalyzeResponse>;
+  async function f_analyzeSafe(files: AnalyzeFileInput[]): Promise<AnalyzeResponse>;
+  async function f_analyzeSafe(arg1: Blob | File | AnalyzeFileInput[], file_name?: string): Promise<AnalyzeResponse> {
+
+    const response = Array.isArray(arg1)
+      ? await f_analyze(arg1)
+      : await f_analyze(arg1, file_name);
+
+    f_resolveAnalyzeResponse(response);
+    return response;
+  }
+
   return {
-    analyze: f_analyze
+    analyze: f_analyze,
+    analyzeSafe: f_analyzeSafe
   };
 }
 

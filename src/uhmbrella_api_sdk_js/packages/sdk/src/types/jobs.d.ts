@@ -1,8 +1,8 @@
-import { AnalyzeResult } from "./analyze";
-import { UsageInfo } from "./usage";
+import type { AnalyzeResult } from "./analyze.js";
+import type { UsageInfo } from "./usage.js";
 
 export type JobProgressCallback = (sent: number, total: number) => void;
-
+export const STATUSES = []
 export type CreateJobInput = {
   files: Array<{
     file: Blob | File;

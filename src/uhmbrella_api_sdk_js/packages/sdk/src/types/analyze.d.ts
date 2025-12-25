@@ -1,24 +1,9 @@
-import { UsageInfo } from "./usage";
+import { MUSIC_CLASSES } from "../constants.js";
+import type { UsageInfo } from "./usage.js";
 
-const C_REAL = "real";
-const C_REAL_V = "realVox";
+export type MusicClass = typeof MUSIC_CLASSES[number];
 
-const C_SUNO = "suno";
-const C_SUNO_V = "sunoVox";
-
-const C_UDIO = "udio";
-const C_UDIO_V = "udioVox";
-
-const C_RIFF = "riff";
-const C_RIFF_V = "riffVox";
-
-const CLASSES = [
-  C_REAL, C_REAL_V, C_SUNO, C_SUNO_V, C_UDIO, C_UDIO_V, C_RIFF, C_RIFF_V
-] as const;
-
-export type MusicClass = typeof CLASSES[number];
-
-interface Segment {
+export interface Segment {
   start: number;
   end: number;
   class: MusicClass,

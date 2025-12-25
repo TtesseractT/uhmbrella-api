@@ -67,17 +67,17 @@ async function main() {
       // chunk_size: 20 * 1024 * 1024
     }
 
-    const job: JobCreateResponse = await client.jobs.create(job_input);
-    console.log("Job Created: ", job);
-
-    const job_status = await client.jobs.status(job.job_id);
-    console.log("Job status: ", JSON.stringify(job_status));
-
-    const job_result: JobResultsResponse = await client.jobs.results(job.job_id);
-    const job_cancel: JobCancelResponse = await client.jobs.cancel(job.job_id);
-
-    console.log("Job Result: ", JSON.stringify(job_result));
-    console.log("Job cancel response: ", JSON.stringify(job_cancel));
+    // const job: JobCreateResponse = await client.jobs.create(job_input);
+    // console.log("Job Created: ", job);
+    //
+    // const job_status = await client.jobs.status(job.job_id);
+    // console.log("Job status: ", JSON.stringify(job_status));
+    //
+    // const job_result: JobResultsResponse = await client.jobs.results(job.job_id);
+    // const job_cancel: JobCancelResponse = await client.jobs.cancel(job.job_id);
+    //
+    // console.log("Job Result: ", JSON.stringify(job_result));
+    // console.log("Job cancel response: ", JSON.stringify(job_cancel));
 
     /**
      * Getting usage info
@@ -89,8 +89,8 @@ async function main() {
      * Synchrnous API
      * */
     // const result: AnalyzeResponse = await client.analyze.analyze(file, file_name);
-    // const result: AnalyzeResponse = await client.analyze.analyze(files);
-    // console.log(result);
+    const result: AnalyzeResponse = await client.analyze.analyzeSafe(files);
+    console.log(result);
 
 
   } catch (error) {
