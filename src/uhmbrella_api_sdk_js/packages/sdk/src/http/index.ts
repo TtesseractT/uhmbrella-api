@@ -1,4 +1,4 @@
-import { create_Http_Client } from "./createHttpClient";
+import { createHttpClient } from "./createHttpClient";
 import { ApiError } from "./errors";
 
-export { create_Http_Client, ApiError };
+export { createHttpClient, ApiError };

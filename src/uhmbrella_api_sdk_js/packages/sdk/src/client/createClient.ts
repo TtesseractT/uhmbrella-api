@@ -1,46 +1,60 @@
-import { create_Analyze_Api } from "../analyze/createAnalyzeApi";
+import { createAnalyzeApi } from "../analyze";
 import { DEFAULT_CHUNK_SIZE, MAX_CHUNK_SIZE } from "../constants";
-import { ApiError, create_Http_Client } from "../http";
+import { ApiError, createHttpClient } from "../http";
 import { HttpClient } from "../http/createHttpClient";
-import { create_Jobs_Api } from "../jobs";
-import { UhmbrellaClientConfigResolved, UhmbrellaClientConfig } from "../types/clientConfig";
-import { create_Usage_Api } from "../usage/createUsageApi";
+import { createJobsApi } from "../jobs";
+import { UhmbrellaClientConfigResolved, UhmbrellaClientConfig, UhmbrellaSDK } from "../types/clientConfig";
+import { createUsageApi } from "../usage";
+import { f_isStringValidHttpUrl } from "../utils";
 import { UhmbrellaClientError } from "./error";
 
+/**
+ * @function createUhmbrellaClient - Creates the Uhmbrella API SDK client.
+ * @param {UhmbrellaClientConfig} config
+ * @returns {UhmbrellaSDK} - Returns a client, call UhmbrellaSDK.usage.usage() to check if key is valid.
+ *
+ * Validates the config using assertion.
+ */
+function createUhmbrellaClient(config: UhmbrellaClientConfig): UhmbrellaSDK {
 
-function createUhmbrellaClient(config: UhmbrellaClientConfig) {
+  f_resolveClientConfig(config);
 
-  f_parse_client_config(config);
-
-  const httpClient = create_Http_Client({
+  const httpClient = createHttpClient({
     api_key: config.api_key,
     base_url: config.base_url,
     f_fetch: config.f_fetch
   });
 
   return {
-    usage: create_Usage_Api(httpClient),
-    analyze: create_Analyze_Api(httpClient),
-    jobs: create_Jobs_Api(httpClient, config.jobs.chunk_size)
+    usage: createUsageApi(httpClient),
+    analyze: createAnalyzeApi(httpClient),
+    jobs: createJobsApi(httpClient, config.jobs.chunk_size)
 
   };
 }
 
-async function createUhmbrellaClientSafe(config: UhmbrellaClientConfig) {
+/**
+ * @function createUhmbrellaClient - Creates the Uhmbrella API SDK client.
+ * @param {UhmbrellaClientConfig} config
+ * @returns {Promise<UhmbrellaSDK>} - Returns a safe, ready to use client.
+ *
+ * Validates the config using assertion.
+ * Calls the Usage API to verify if the provided API key belongs to a valid User or not.
+ */
+async function createUhmbrellaClientSafe(config: UhmbrellaClientConfig): Promise<UhmbrellaSDK> {
   let httpClient: HttpClient;
 
   try {
-    f_parse_client_config(config);
+    f_resolveClientConfig(config);
 
-    console.log(config)
-    httpClient = create_Http_Client({
+    httpClient = createHttpClient({
       api_key: config.api_key,
       base_url: config.base_url,
       f_fetch: config.f_fetch
     });
 
 
-    await create_Usage_Api(httpClient).getUsage();
+    await createUsageApi(httpClient).getUsage();
 
 
   } catch (error) {
@@ -50,13 +64,13 @@ async function createUhmbrellaClientSafe(config: UhmbrellaClientConfig) {
     throw error;
   }
   return {
-    usage: create_Usage_Api(httpClient),
-    analyze: create_Analyze_Api(httpClient),
-    jobs: create_Jobs_Api(httpClient, config.jobs.chunk_size)
+    usage: createUsageApi(httpClient),
+    analyze: createAnalyzeApi(httpClient),
+    jobs: createJobsApi(httpClient, config.jobs.chunk_size)
   };
 }
 
-function f_parse_client_config(
+function f_resolveClientConfig(
   config: UhmbrellaClientConfig
 ): asserts config is UhmbrellaClientConfigResolved {
 
@@ -71,14 +85,18 @@ function f_parse_client_config(
   config.jobs ??= {};
   config.jobs.chunk_size ??= DEFAULT_CHUNK_SIZE;
 
-  if (!f_is_Valid_Http_Url(config.base_url)) {
+  if (!f_isStringValidHttpUrl(config.base_url)) {
     throw new UhmbrellaClientError({ message: "Invalid base_url" });
   }
 
   if (typeof config.f_fetch !== "function") {
     throw new UhmbrellaClientError({ message: "Invalid f_fetch" });
   }
-
+  if (!Number.isFinite(config.jobs.chunk_size)) {
+    throw new UhmbrellaClientError({
+      message: "chunk_size must be a finite integer"
+    });
+  }
   if (config.jobs.chunk_size > MAX_CHUNK_SIZE) {
     throw new UhmbrellaClientError({
       message: `chunk_size cannot exceed ${MAX_CHUNK_SIZE / 1024 / 1024} MB`
@@ -94,13 +112,6 @@ function f_parse_client_config(
 
 }
 
-export function f_is_Valid_Http_Url(value: string): boolean {
-  try {
-    const url = new URL(value);
-    return url.protocol === "http:" || url.protocol === "https:";
-  } catch {
-    return false;
-  }
-}
+
 export { createUhmbrellaClient, createUhmbrellaClientSafe }
 

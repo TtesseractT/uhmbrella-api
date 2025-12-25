@@ -1,17 +1,21 @@
-import {
-  type AnalyzeResponse,
-  ApiError,
-  type CreateJobInput,
-  createUhmbrellaClientSafe,
-  type JobCancelResponse,
-  type JobCreateResponse,
-  type JobResultsResponse,
-  type UhmbrellaClientConfig,
-  UhmbrellaClientError,
-  type UhmbrellaSDK,
-  UhmbrellaSDKError,
-  type UsageInfo
+import type {
+  AnalyzeResponse,
+  CreateJobInput,
+  JobCancelResponse,
+  JobCreateResponse,
+  JobResultsResponse,
+  UhmbrellaClientConfig,
+  UsageInfo,
+  UhmbrellaSDK,
 } from "@uhmbrella/sdk";
+
+import {
+  createUhmbrellaClientSafe,
+  UhmbrellaSDKError,
+  UhmbrellaClientError,
+  ApiError,
+} from "@uhmbrella/sdk";
+
 import { loadAudio, loadAudioFilesFromDirectory, type AudioFile } from "@uhmbrella/sdk-node";
 import "dotenv/config";
 
@@ -31,9 +35,9 @@ async function main() {
     const config: UhmbrellaClientConfig = {
       api_key: process.env.API_KEY!,
       // base_url: "",
-      // jobs: {
-      //   chunk_size: 20 * 1024 * 1024 // default is 50 * 1024 * 1024
-      // }
+      jobs: {
+        chunk_size: 20 * 1024 * 1024
+      }
       // f_fetch:  // You can use your own fetch library, but it has to conform to the WHATWG Fetch API. It should also return the Response object.
     }
 
@@ -70,10 +74,10 @@ async function main() {
     console.log("Job status: ", JSON.stringify(job_status));
 
     const job_result: JobResultsResponse = await client.jobs.results(job.job_id);
-    // const job_cancel: JobCancelResponse = await client.jobs.cancel(job.job_id);
+    const job_cancel: JobCancelResponse = await client.jobs.cancel(job.job_id);
 
     console.log("Job Result: ", JSON.stringify(job_result));
-    // console.log("Job cancel response: ", JSON.stringify(job_cancel));
+    console.log("Job cancel response: ", JSON.stringify(job_cancel));
 
     /**
      * Getting usage info
@@ -91,7 +95,7 @@ async function main() {
 
   } catch (error) {
     if (error instanceof UhmbrellaSDKError) {
-      console.error(error.name, ":", error.message);
+      console.error(error);
     }
   }
 

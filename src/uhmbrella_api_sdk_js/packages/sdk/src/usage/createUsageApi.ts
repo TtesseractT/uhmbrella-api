@@ -3,7 +3,7 @@ import { UsageInfo } from "../types/usage";
 
 
 
-const create_Usage_Api = (httpClient: HttpClient) => {
+const createUsageApi = (httpClient: HttpClient) => {
 
   function f_get_usage(): Promise<UsageInfo> {
     return httpClient.get<UsageInfo>("/usage", {});
@@ -12,4 +12,4 @@ const create_Usage_Api = (httpClient: HttpClient) => {
   return { getUsage: f_get_usage };
 }
 
-export { create_Usage_Api };
+export { createUsageApi };

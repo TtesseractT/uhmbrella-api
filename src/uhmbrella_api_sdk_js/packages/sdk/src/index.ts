@@ -3,7 +3,6 @@ export { createUhmbrellaClient, createUhmbrellaClientSafe } from "./client";
 export type {
   UhmbrellaSDK,
   UhmbrellaClientConfig,
-  ParsedUhmbrellaClientConfig,
   UsageInfo,
   AnalyzeResponse,
   JobCreateResponse,

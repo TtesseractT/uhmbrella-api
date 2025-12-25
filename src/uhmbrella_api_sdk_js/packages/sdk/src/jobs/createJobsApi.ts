@@ -1,9 +1,9 @@
 import { DEFAULT_CHUNK_SIZE, MAX_CHUNK_SIZE } from "../constants";
 import type { HttpClient } from "../http/createHttpClient";
 import { CreateJobInput, JobCancelResponse, JobCreateResponse, JobResultsResponse, JobStatusResponse } from "../types";
-import { f_get_Total_Bytes, f_chunk_Blob } from "../utils";
+import { f_getTotalBytes, f_chunkBlob } from "../utils";
 
-export function create_Jobs_Api(http: HttpClient, chunkSize: number = DEFAULT_CHUNK_SIZE) {
+export function createJobsApi(http: HttpClient, chunkSize: number = DEFAULT_CHUNK_SIZE) {
 
 
   async function f_create_job(jobInput: CreateJobInput): Promise<JobCreateResponse> {
@@ -19,7 +19,7 @@ export function create_Jobs_Api(http: HttpClient, chunkSize: number = DEFAULT_CH
     const init = await http.post<{ job_id: string }>("/v1/jobs/init", {});
     const jobId = init.job_id;
 
-    const totalBytes = f_get_Total_Bytes(files);
+    const totalBytes = f_getTotalBytes(files);
     let sentBytes = 0;
 
     onProgress?.(sentBytes, totalBytes);
@@ -28,7 +28,7 @@ export function create_Jobs_Api(http: HttpClient, chunkSize: number = DEFAULT_CH
       const totalChunks = Math.ceil(file.size / r_chunk_size);
       let index = 0;
 
-      for (const chunk of f_chunk_Blob(file, r_chunk_size)) {
+      for (const chunk of f_chunkBlob(file, r_chunk_size)) {
 
         await http.post(`/v1/jobs/${jobId}/upload-chunk?` +
           new URLSearchParams(
