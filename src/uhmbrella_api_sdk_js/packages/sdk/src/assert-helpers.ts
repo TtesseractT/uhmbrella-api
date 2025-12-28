@@ -10,19 +10,19 @@ export function assertObject(value: unknown, message = "Expected object"): asser
 
 export function assertNumber(value: unknown, name: string): asserts value is number {
   if (typeof value !== "number" || !Number.isFinite(value)) {
-    throw new Error(`Expected ${name} to be a number`);
+    throw new Error(`Expected ${name} to be a number, got ${value}`);
   }
 }
 
 export function assertString(value: unknown, name: string): asserts value is string {
   if (typeof value !== "string") {
-    throw new Error(`Expected ${name} to be a string`);
+    throw new Error(`Expected ${name} to be a string, got ${value}`);
   }
 }
 
 export function assertArray<T>(value: unknown, name: string): asserts value is T[] {
   if (!Array.isArray(value)) {
-    throw new Error(`Expected ${name} to be an array`);
+    throw new Error(`Expected ${name} to be an array, got ${value}`);
   }
 }
 export function assertOneOf<T extends readonly string[]>(
@@ -115,7 +115,7 @@ export function assertSegment(object: unknown, name: string = 'segment'): assert
   assertFloatRange(object.confidence, `${name}.confidence`);
 }
 
-export function assertSegments(array: unknown, name: "result.segments" | "result.segmentsVox"): asserts array is Segment {
+export function assertSegments(array: unknown, name: string): asserts array is Segment {
 
   assertArray(array, name);
   let idx = 0;
@@ -147,20 +147,20 @@ export function assertFloatRange(
 }
 export function assertAnalyzeResult(object: unknown, name: string = "result"): asserts object is AnalyzeResult {
 
-  assertObject(object, "AnalyzeResult");
+  assertObject(object, `${name}`);
 
-  assertString(object.filename, "result.filename");
-  assertString(object.analysis_timestamp, "result.analysis_timestamp");
-  assertFiniteNumber(object.time_actual, "result.time_actual");
+  assertString(object.filename, `${name}.filename`);
+  assertString(object.analysis_timestamp, `${name}.analysis_timestamp`);
+  assertFiniteNumber(object.time_actual, `${name}.time_actual`);
 
-  assertPercentages(object.percentages, "percentages");
+  assertPercentages(object.percentages, `${name}.percentages`);
 
-  assertSegments(object.segments, "result.segments");
-  assertSegments(object.segmentsVox, "result.segmentsVox");
+  assertSegments(object.segments, `${name}.segments`);
+  assertSegments(object.segmentsVox, `${name}.segmentsVox`);
 
-  assertString(object.uhm_filename, "result.uhm_filename");
-  assertNumber(object.audio_seconds, "result.audio_seconds");
-  assertNumber(object.billed_seconds, "result.billed_seconds");
+  assertString(object.uhm_filename, `${name}.uhm_filename`);
+  assertNumber(object.audio_seconds, `${name}.audio_seconds`);
+  assertNumber(object.billed_seconds, `${name}.billed_seconds`);
 
 }
 

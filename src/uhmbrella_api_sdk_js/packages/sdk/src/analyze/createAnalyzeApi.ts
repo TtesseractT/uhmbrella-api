@@ -1,33 +1,34 @@
+import { assertAnalyzeResult } from "../assert-helpers";
 import { MAX_CHUNK_SIZE, MAX_SYNC_FILES } from "../constants";
 import { UhmbrellaSDKError } from "../error";
 import { HttpClient } from "../http/createHttpClient";
-import { AnalyzeFileInput, AnalyzeResponse } from "../types/";
+import { AnalyzeFileInput, AnalyzeOptions, AnalyzeBatchResponse, AnalyzeResult } from "../types/";
 import { f_getTotalBytes } from "../utils";
-import { f_resolveAnalyzeResponse } from "./analyze.assert";
+import { f_resolveAnalyzeBatchResponse } from "./analyze.assert";
 
 const createAnalyzeApi = (httpClient: HttpClient) => {
 
   /**
  * @returns AnalyzeResponse 
  * */
-  function f_analyze_File(file: Blob | File, file_name?: string): Promise<AnalyzeResponse> {
+  function f_analyze_File(file: Blob | File, options?: AnalyzeOptions): Promise<AnalyzeResult> {
     if (f_getTotalBytes([{ file }]) > MAX_CHUNK_SIZE) {
-      throw new UhmbrellaSDKError({ name: "Max size exeeded", message: `file ${file_name} is bigger than the ${(MAX_CHUNK_SIZE / 1024) / 1024} MB limit. Use jobs.create .` });
+      throw new UhmbrellaSDKError({ name: "Max size exeeded", message: `file ${options?.file_name ?? ''} is bigger than the ${(MAX_CHUNK_SIZE / 1024) / 1024} MB limit. Use jobs.create .` });
     }
     const form = new FormData();
 
-    form.append("file", file, file_name);
+    form.append("file", file, options?.file_name);
 
-    return httpClient.post<AnalyzeResponse>("/v1/analyze", {
+    return httpClient.post<AnalyzeResult>("/v1/analyze", {
       body: form
-    });
+    },
+      { timeout_ms: options?.timeout_ms }
+    );
   }
 
-  function f_analyze_Batch(files: Array<{ file: Blob | File; file_name?: string }>): Promise<AnalyzeResponse> {
+  function f_analyze_Batch(files: Array<{ file: Blob | File; file_name?: string }>, options?: AnalyzeOptions): Promise<AnalyzeBatchResponse> {
 
-    if (files.length == 1) {
-      return f_analyze_File(files[0]!.file, files[0]?.file_name);
-    } else if (files.length > MAX_SYNC_FILES) {
+    if (files.length > MAX_SYNC_FILES) {
       throw new UhmbrellaSDKError({ name: "Invalid params", message: `Number of audio files exeeded ${MAX_SYNC_FILES}, use jobs.create .` });
     } else if (f_getTotalBytes(files) > MAX_CHUNK_SIZE) {
       throw new UhmbrellaSDKError({ name: "Max size exeeded", message: `The total size ${f_getTotalBytes(files)} Bytes for all the files is more than the ${MAX_CHUNK_SIZE} Bytes limit. Use jobs.create to send data in chunks.` })
@@ -38,34 +39,46 @@ const createAnalyzeApi = (httpClient: HttpClient) => {
       form.append("files", file, file_name);
     }
 
-    return httpClient.post<AnalyzeResponse>("/v1/analyze-batch", {
+    return httpClient.post<AnalyzeBatchResponse>("/v1/analyze-batch", {
       body: form
-    });
+    },
+      { timeout_ms: options?.timeout_ms }
+    );
   }
 
 
-  function f_analyze(file: Blob | File, file_name?: string): Promise<AnalyzeResponse>;
-  function f_analyze(files: AnalyzeFileInput[]): Promise<AnalyzeResponse>;
-  function f_analyze(arg1: Blob | File | AnalyzeFileInput[], file_name?: string): Promise<AnalyzeResponse> {
+  function f_analyze(file: Blob | File, options?: AnalyzeOptions): Promise<AnalyzeResult>;
+
+  function f_analyze(files: AnalyzeFileInput[], options?: AnalyzeOptions): Promise<AnalyzeBatchResponse>;
+
+  function f_analyze(arg1: Blob | File | AnalyzeFileInput[], options: AnalyzeOptions = {}): Promise<AnalyzeBatchResponse | AnalyzeResult> {
 
     if (Array.isArray(arg1)) {
-      return f_analyze_Batch(arg1);
+      return f_analyze_Batch(arg1, options);
     }
 
-    return f_analyze_File(arg1, file_name);
+    return f_analyze_File(arg1, options);
   }
 
+  async function f_analyzeSafe(file: Blob | File, options?: AnalyzeOptions): Promise<AnalyzeResult>;
+  async function f_analyzeSafe(files: AnalyzeFileInput[], options?: AnalyzeOptions): Promise<AnalyzeBatchResponse>;
+  async function f_analyzeSafe(arg1: Blob | File | AnalyzeFileInput[], options?: AnalyzeOptions): Promise<AnalyzeBatchResponse | AnalyzeResult> {
 
-  async function f_analyzeSafe(file: Blob | File, file_name?: string): Promise<AnalyzeResponse>;
-  async function f_analyzeSafe(files: AnalyzeFileInput[]): Promise<AnalyzeResponse>;
-  async function f_analyzeSafe(arg1: Blob | File | AnalyzeFileInput[], file_name?: string): Promise<AnalyzeResponse> {
+    if (Array.isArray(arg1)) {
+      if (arg1.length === 1) {
+        const res = await f_analyze_File(arg1[0]!.file, options);
+        assertAnalyzeResult(res);
+        return res;
+      }
 
-    const response = Array.isArray(arg1)
-      ? await f_analyze(arg1)
-      : await f_analyze(arg1, file_name);
+      const res = await f_analyze_Batch(arg1, { timeout_ms: options?.timeout_ms });
+      f_resolveAnalyzeBatchResponse(res);
+      return res;
+    }
 
-    f_resolveAnalyzeResponse(response);
-    return response;
+    const res = await f_analyze_File(arg1, options);
+    assertAnalyzeResult(res);
+    return res;
   }
 
   return {

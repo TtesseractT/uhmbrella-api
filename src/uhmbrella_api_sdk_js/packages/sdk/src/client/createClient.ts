@@ -1,5 +1,6 @@
 import { createAnalyzeApi } from "../analyze";
-import { DEFAULT_CHUNK_SIZE, MAX_CHUNK_SIZE } from "../constants";
+import { assertNumber } from "../assert-helpers";
+import { DEFAULT_CHUNK_SIZE, DEFAULT_TIMEOUT_MS, MAX_CHUNK_SIZE } from "../constants";
 import { ApiError, createHttpClient } from "../http";
 import { HttpClient } from "../http/createHttpClient";
 import { createJobsApi } from "../jobs";
@@ -22,6 +23,7 @@ function createUhmbrellaClient(config: UhmbrellaClientConfig): UhmbrellaSDK {
   const httpClient = createHttpClient({
     api_key: config.api_key,
     base_url: config.base_url,
+    timeout_ms: config.request_options.timeout_ms,
     f_fetch: config.f_fetch
   });
 
@@ -50,6 +52,7 @@ async function createUhmbrellaClientSafe(config: UhmbrellaClientConfig): Promise
     httpClient = createHttpClient({
       api_key: config.api_key,
       base_url: config.base_url,
+      timeout_ms: config.request_options.timeout_ms,
       f_fetch: config.f_fetch
     });
 
@@ -80,6 +83,9 @@ function f_resolveClientConfig(
     });
   }
 
+  config.request_options ??= { timeout_ms: DEFAULT_TIMEOUT_MS };
+  config.request_options.timeout_ms ??= DEFAULT_TIMEOUT_MS;
+
   config.base_url ??= "https://api.uhmbrella.io";
   config.f_fetch ??= fetch;
   config.jobs ??= {};
@@ -109,6 +115,14 @@ function f_resolveClientConfig(
     });
   }
 
+  assertNumber(config.request_options.timeout_ms, "config.request_options.timeout_ms");
+  if (config.request_options.timeout_ms < 1) {
+
+    throw new UhmbrellaClientError({
+      message: `config.timeout_ms must be a positive integer, got ${config.request_options.timeout_ms}`
+    });
+  }
+  config.request_options.timeout_ms = Math.floor(config.request_options.timeout_ms);
 
 }
 

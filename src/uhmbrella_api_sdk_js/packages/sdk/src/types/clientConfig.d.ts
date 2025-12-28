@@ -2,6 +2,14 @@ import { createAnalyzeApi } from "../analyze";
 import { createUhmbrellaClient } from "../client";
 import { createJobsApi } from "../jobs";
 import { createUsageApi } from "../usage";
+import { CreateJobOptions } from "./jobs";
+
+export type RequestOptions = {
+  /**
+  * Defaults to 30000 ms.
+  */
+  timeout_ms?: number;
+};
 
 /**
  *@type UhmbrellaClientConfig - Required by createUhmbrellaClient
@@ -16,15 +24,10 @@ export type UhmbrellaClientConfig = {
    * Defaults to "https://api.uhmbrella.io"
    */
   base_url?: string;
-  jobs?: {
-    /**
-     *  Optional.
-     *  Must be in the range of 1048576 and 52428800.
-     *  Defaults to DEFAULT_CHUNK_SIZE
-     */
-    chunk_size?: number;
-  }
 
+  jobs?: CreateJobOptions;
+
+  request_options?: RequestOptions;
   /**
    *@function fetch - Must conform to the WHATWG Fetch API. It should also return the Response object.
    *Optional.
@@ -32,14 +35,10 @@ export type UhmbrellaClientConfig = {
   f_fetch?: typeof fetch;
 };
 
-export type UhmbrellaClientConfigResolved = Omit<UhmbrellaClientConfig, "jobs" | "base_url" | "f_fetch"> & {
-  base_url: string;
-  f_fetch: typeof fetch;
-  jobs: {
-    chunk_size: number;
-  };
+export type UhmbrellaClientConfigResolved = Omit<Required<UhmbrellaClientConfig>, "jobs" | "request_options"> & {
+  jobs: Required<CreateJobOptions>;
+  request_options: Required<RequestOptions>;
 };
-
 export type UhmbrellaSDK = {
   usage: ReturnType<typeof createUsageApi>,
   analyze: ReturnType<typeof createAnalyzeApi>,

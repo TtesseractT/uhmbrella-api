@@ -4,12 +4,16 @@ export type {
   UhmbrellaSDK,
   UhmbrellaClientConfig,
   UsageInfo,
-  AnalyzeResponse,
+  AnalyzeResult,
+  AnalyzeBatchResponse,
+  AnalyzeOptions,
+  AnalyzeFileInput,
   JobCreateResponse,
   JobProgressCallback,
   JobResultsResponse,
   JobStatusResponse,
-  CreateJobInput,
+  CreateJobConfig,
+  CreateJobOptions,
   JobCancelResponse
 } from "./types/";
 

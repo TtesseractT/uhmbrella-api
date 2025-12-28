@@ -1,19 +1,26 @@
-import type { AnalyzeResponse, AnalyzeFileInput, FileUploadCallback } from "./analyze.d.ts";
-import type { UhmbrellaClientConfigResolved, UhmbrellaClientConfig, UhmbrellaSDK } from "./clientConfig.d.ts";
+import type { AnalyzeOptions, AnalyzeResult, AnalyzeBatchResponse, AnalyzeFileInput } from "./analyze.d.ts";
+import type { RequestOptions, UhmbrellaClientConfigResolved, UhmbrellaClientConfig, UhmbrellaSDK } from "./clientConfig.d.ts";
 import type { PlanName, UsageInfo } from "./usage.d.ts";
-import { JobProgressCallback, CreateJobInput, JobStatusResponse, JobCreateResponse, JobResultsResponse, JobCancelResponse } from "./jobs";
+import type { CreateJobOptions, JobProgressCallback, CreateJobConfig, JobStatusResponse, JobCreateResponse, JobResultsResponse, JobCancelResponse, JobStatus } from "./jobs";
 
 export {
   UhmbrellaSDK,
   UhmbrellaClientConfigResolved,
   UhmbrellaClientConfig,
+  RequestOptions,
+
   PlanName,
   UsageInfo,
-  AnalyzeResponse,
+
+  AnalyzeResult,
+  AnalyzeBatchResponse,
   AnalyzeFileInput,
-  FileUploadCallback,
+  AnalyzeOptions,
   JobProgressCallback,
-  CreateJobInput,
+  CreateJobConfig,
+  CreateJobOptions,
+
+  JobStatus,
   JobStatusResponse,
   JobCreateResponse,
   JobResultsResponse,

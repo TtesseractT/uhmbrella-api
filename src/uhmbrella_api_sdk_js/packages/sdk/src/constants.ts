@@ -1,8 +1,9 @@
 export const MAX_SYNC_FILES = 40;
+
 export const MAX_CHUNK_SIZE = 50 * 1024 * 1024;
 export const DEFAULT_CHUNK_SIZE = 20 * 1024 * 1024;
 
-
+export const DEFAULT_TIMEOUT_MS = 30000;
 
 export const PLAN_NAMES = [
   "trial",
@@ -31,4 +32,5 @@ export const MUSIC_CLASSES = [
   C_REAL, C_REAL_V, C_SUNO, C_SUNO_V, C_UDIO, C_UDIO_V, C_RIFF, C_RIFF_V
 ] as const;
 
+export const J_STATUS = <const>['queued', 'pending', 'processing', 'done', 'error', 'cancelling', 'cancelled'];
 

@@ -1,4 +1,5 @@
 import { MUSIC_CLASSES } from "../constants.js";
+import { RequestOptions } from "./clientConfig.js";
 import type { UsageInfo } from "./usage.js";
 
 export type MusicClass = typeof MUSIC_CLASSES[number];
@@ -27,7 +28,7 @@ export type AnalyzeResult = {
   billed_seconds: number;
 };
 
-export type AnalyzeResponse = {
+export type AnalyzeBatchResponse = {
   total_files: number;
   total_audio_seconds: number;
   total_billed_seconds: number;
@@ -40,5 +41,7 @@ export type AnalyzeFileInput = {
   file_name?: string;
 };
 
-export type FileUploadCallback = (filename: string, sent: number, total: number) => void;
+export type AnalyzeOptions = RequestOptions & {
+  file_name?: string;
+};
 
