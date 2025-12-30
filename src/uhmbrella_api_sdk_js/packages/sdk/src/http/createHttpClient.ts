@@ -54,9 +54,12 @@ export const createHttpClient = (clientConfig: HttpClientConfig) => {
     }
 
     const contentType = res.headers.get("content-type") ?? "";
-    const body = contentType.includes("application/json")
-      ? await res.json()
-      : await res.text();
+
+    if (!contentType.includes("application/json")) {
+      throw new ApiError({ status: res.status, message: "API response was not a JSON object." });
+    }
+
+    const body = await res.json();
 
     if (!res.ok) {
       throw new ApiError({
@@ -82,7 +85,7 @@ function f_normalizeTimeoutMs(value: unknown, fallback: number): number {
     return fallback;
   }
 
-  if (value < 1) {
+  if (value < 0) {
     return fallback;
   }
 

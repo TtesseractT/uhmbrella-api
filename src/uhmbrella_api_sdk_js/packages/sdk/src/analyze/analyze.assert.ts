@@ -1,4 +1,4 @@
-import { assertObject, assertNumber, assertArray, assertString, assertUsageInfo, assertPercentages, assertSegments, assertAnalyzeResults } from "../assert-helpers";
+import { assertObject, assertNumber, assertUsageInfo, assertAnalyzeResults } from "../asserts";
 import { AnalyzeBatchResponse } from "../types";
 
 export function f_resolveAnalyzeBatchResponse(response: unknown): asserts response is AnalyzeBatchResponse {

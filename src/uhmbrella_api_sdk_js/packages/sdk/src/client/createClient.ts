@@ -1,6 +1,6 @@
 import { createAnalyzeApi } from "../analyze";
-import { assertNumber } from "../assert-helpers";
-import { DEFAULT_CHUNK_SIZE, DEFAULT_TIMEOUT_MS, MAX_CHUNK_SIZE } from "../constants";
+import { assertNumber } from "../asserts";
+import { DEFAULT_CHUNK_SIZE, DEFAULT_TIMEOUT_MS, DEFAULT_URL, MAX_CHUNK_SIZE } from "../constants";
 import { ApiError, createHttpClient } from "../http";
 import { HttpClient } from "../http/createHttpClient";
 import { createJobsApi } from "../jobs";
@@ -49,6 +49,12 @@ async function createUhmbrellaClientSafe(config: UhmbrellaClientConfig): Promise
   try {
     f_resolveClientConfig(config);
 
+    if (!(await isFetchCompatible(config.f_fetch))) {
+      throw new UhmbrellaClientError({
+        message: "Provided fetch is not WHATWG-compatible"
+      });
+    }
+
     httpClient = createHttpClient({
       api_key: config.api_key,
       base_url: config.base_url,
@@ -77,16 +83,20 @@ function f_resolveClientConfig(
   config: UhmbrellaClientConfig
 ): asserts config is UhmbrellaClientConfigResolved {
 
-  if (!config.api_key || config.api_key.length < 21) {
+  if (!config.api_key || config.api_key.length != 21) {
     throw new UhmbrellaClientError({
-      message: "API key is required, minimum length is 21. e.g.: UHM-XXXXX-XXXXX-XXXXX"
+      message: "API key is required, required length is 21. e.g.: UHM-XXXXX-XXXXX-XXXXX"
     });
   }
-
+  if (!config.api_key.startsWith('UHM-')) {
+    throw new UhmbrellaClientError({
+      message: "Invalid API key format, must start with UHM-"
+    });
+  }
   config.request_options ??= { timeout_ms: DEFAULT_TIMEOUT_MS };
   config.request_options.timeout_ms ??= DEFAULT_TIMEOUT_MS;
 
-  config.base_url ??= "https://api.uhmbrella.io";
+  config.base_url ??= DEFAULT_URL;
   config.f_fetch ??= fetch;
   config.jobs ??= {};
   config.jobs.chunk_size ??= DEFAULT_CHUNK_SIZE;
@@ -116,16 +126,28 @@ function f_resolveClientConfig(
   }
 
   assertNumber(config.request_options.timeout_ms, "config.request_options.timeout_ms");
-  if (config.request_options.timeout_ms < 1) {
+  if (config.request_options.timeout_ms < 0) {
 
     throw new UhmbrellaClientError({
-      message: `config.timeout_ms must be a positive integer, got ${config.request_options.timeout_ms}`
+      message: `config.timeout_ms must be not a negative integer, got ${config.request_options.timeout_ms}`
     });
   }
   config.request_options.timeout_ms = Math.floor(config.request_options.timeout_ms);
 
 }
 
+async function isFetchCompatible(
+  f: typeof fetch
+): Promise<boolean> {
+  try {
+    const res = await f("data:text/plain,ok");
+    return typeof res === "object" &&
+      typeof res.ok === "boolean" &&
+      typeof res.headers?.get === "function";
+  } catch {
+    return false;
+  }
+}
 
 export { createUhmbrellaClient, createUhmbrellaClientSafe }
 

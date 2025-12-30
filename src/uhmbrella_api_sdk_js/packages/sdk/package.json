@@ -9,8 +9,6 @@
     "README.md",
     "LICENSE"
   ],
-
-
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -18,23 +16,20 @@
       "require": "./dist/index.cjs"
     }
   },
-
   "main": "./dist/index.cjs",
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
-
   "sideEffects": false,
-
   "scripts": {
     "build": "tsup src/index.ts --format esm,cjs --dts",
     "clean": "rm -rf dist",
-    "prepublishOnly": "npm run clean && npm run build"
+    "prepublishOnly": "npm run clean && npm run build",
+    "test": "vitest run",
+    "test:watch": "vitest"
   },
-
-
   "devDependencies": {
     "tsup": "^8.0.0",
-    "typescript": "^5.4.0"
+    "typescript": "^5.4.0",
+    "vitest": "^4.0.16"
   }
 }
-

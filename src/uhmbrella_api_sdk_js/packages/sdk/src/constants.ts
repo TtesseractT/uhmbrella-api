@@ -1,3 +1,5 @@
+export const DEFAULT_URL = "https://api.uhmbrella.io";
+
 export const MAX_SYNC_FILES = 40;
 
 export const MAX_CHUNK_SIZE = 50 * 1024 * 1024;

@@ -1,4 +1,4 @@
-import { assertAnalyzeResult } from "../assert-helpers";
+import { assertAnalyzeResult } from "../asserts";
 import { MAX_CHUNK_SIZE, MAX_SYNC_FILES } from "../constants";
 import { UhmbrellaSDKError } from "../error";
 import { HttpClient } from "../http/createHttpClient";
