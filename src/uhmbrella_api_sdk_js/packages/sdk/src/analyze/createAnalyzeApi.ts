@@ -63,22 +63,37 @@ const createAnalyzeApi = (httpClient: HttpClient) => {
   async function f_analyzeSafe(file: Blob | File, options?: AnalyzeOptions): Promise<AnalyzeResult>;
   async function f_analyzeSafe(files: AnalyzeFileInput[], options?: AnalyzeOptions): Promise<AnalyzeBatchResponse>;
   async function f_analyzeSafe(arg1: Blob | File | AnalyzeFileInput[], options?: AnalyzeOptions): Promise<AnalyzeBatchResponse | AnalyzeResult> {
+    const expectBatch = Array.isArray(arg1);
 
-    if (Array.isArray(arg1)) {
-      if (arg1.length === 1) {
-        const res = await f_analyze_File(arg1[0]!.file, options);
-        assertAnalyzeResult(res);
-        return res;
+    const res = expectBatch
+      ? arg1.length === 1
+        ? await f_analyze_File(arg1[0]!.file, { file_name: arg1[0]!.file_name, ...options })
+        : await f_analyze_Batch(arg1, { timeout_ms: options?.timeout_ms })
+      : await f_analyze_File(arg1, options);
+
+    if (expectBatch && arg1.length > 1) {
+      if (!f_isAnalyzeBatchResponse(res)) {
+        throw new UhmbrellaSDKError({
+          name: "ValidationError",
+          message: "Expected batch response but got single result - server contract violation"
+        });
       }
 
-      const res = await f_analyze_Batch(arg1, { timeout_ms: options?.timeout_ms });
       f_resolveAnalyzeBatchResponse(res);
       return res;
-    }
 
-    const res = await f_analyze_File(arg1, options);
-    assertAnalyzeResult(res);
-    return res;
+    } else {
+
+      if (!f_isAnalyzeResult(res)) {
+        throw new UhmbrellaSDKError({
+          name: "ValidationError",
+          message: "Expected single result but got batch response - server contract violation"
+        });
+      }
+
+      assertAnalyzeResult(res);
+      return res;
+    }
   }
 
   return {
@@ -88,3 +103,25 @@ const createAnalyzeApi = (httpClient: HttpClient) => {
 }
 
 export { createAnalyzeApi };
+
+//type guards
+function f_isAnalyzeBatchResponse(value: unknown): value is AnalyzeBatchResponse {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "results" in value &&
+    Array.isArray((value as any).results) &&
+    "total_files" in value
+  );
+}
+
+function f_isAnalyzeResult(value: unknown): value is AnalyzeResult {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "filename" in value &&
+    "percentages" in value &&
+    ("segments" in value || "segmentsVox" in value)
+  );
+}
+

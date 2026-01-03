@@ -45,6 +45,7 @@ export const createHttpClient = (clientConfig: HttpClientConfig) => {
       }
       throw new ApiError({
         status: 0,
+        name: "NetworkError",
         message: "Network error: failed to connect to Uhmbrella API",
         body: err
       });

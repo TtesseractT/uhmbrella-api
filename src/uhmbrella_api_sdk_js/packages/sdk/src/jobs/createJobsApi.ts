@@ -1,4 +1,5 @@
 import { DEFAULT_CHUNK_SIZE, MAX_CHUNK_SIZE } from "../constants";
+import { UhmbrellaSDKError } from "../error";
 import type { HttpClient } from "../http/createHttpClient";
 import { CreateJobConfig, JobCancelResponse, JobCreateResponse, JobResultsResponse, JobStatusResponse } from "../types";
 import { f_getTotalBytes, f_chunkBlob } from "../utils";
@@ -19,6 +20,14 @@ export function createJobsApi(http: HttpClient, chunkSize: number = DEFAULT_CHUN
     const r_chunk_size = chunk_size > MAX_CHUNK_SIZE ? MAX_CHUNK_SIZE : chunk_size;
 
     const init = await http.post<{ job_id: string }>("/v1/jobs/init", {});
+
+    if (!init.job_id) {
+      throw new UhmbrellaSDKError({
+        name: "ApiError",
+        message: "jobs.init did not return job_id"
+      });
+    }
+
     const jobId = init.job_id;
 
     const totalBytes = f_getTotalBytes(files);
