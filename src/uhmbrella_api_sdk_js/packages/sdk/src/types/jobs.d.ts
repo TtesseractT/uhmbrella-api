@@ -4,16 +4,16 @@ import type { UsageInfo } from "./usage.js";
 import { J_STATUS } from "../constants.js";
 export type JobProgressCallback = (sent: number, total: number) => void;
 export type JobStatus = typeof J_STATUS[number];
-export type CreateJobConfig = {
+export type JobConfig = {
   files: Array<{
     file: Blob | File;
     file_name?: string;
   }>;
 
-  options?: CreateJobOptions;
+  options?: JobOptions;
 };
 
-export type CreateJobOptions = {
+export type JobOptions = {
   onProgress?: JobProgressCallback;
 
   /**

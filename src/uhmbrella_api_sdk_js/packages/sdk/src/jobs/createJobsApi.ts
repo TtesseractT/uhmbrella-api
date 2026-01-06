@@ -1,18 +1,22 @@
+import { UhmbrellaAssertError } from "../asserts";
 import { DEFAULT_CHUNK_SIZE, MAX_CHUNK_SIZE } from "../constants";
 import { UhmbrellaSDKError } from "../error";
 import type { HttpClient } from "../http/createHttpClient";
-import { CreateJobConfig, JobCancelResponse, JobCreateResponse, JobResultsResponse, JobStatusResponse } from "../types";
+import { JobConfig, JobCancelResponse, JobCreateResponse, JobResultsResponse, JobStatusResponse } from "../types";
 import { f_getTotalBytes, f_chunkBlob } from "../utils";
 import { f_assertJobCreateResponse, f_assertJobResultResponse, f_assertJobStatusResponse } from "./jobs.assert";
 
 export function createJobsApi(http: HttpClient, chunkSize: number = DEFAULT_CHUNK_SIZE) {
 
 
-  async function f_create_job(jobConfig: CreateJobConfig): Promise<JobCreateResponse> {
+  async function f_create_job(jobConfig: JobConfig): Promise<JobCreateResponse> {
     const {
       files,
     } = jobConfig;
 
+    if (!files || files.length == 0) {
+      throw new UhmbrellaSDKError({ name: "Invalid arguement", message: "No files received" });
+    }
     const onProgress = jobConfig.options?.onProgress;
     const chunk_size = jobConfig.options?.chunk_size ?? chunkSize;
     const chunk_upload_timeout = jobConfig.options?.chunk_upload_timeout;
@@ -76,24 +80,37 @@ export function createJobsApi(http: HttpClient, chunkSize: number = DEFAULT_CHUN
     return http.post<JobCancelResponse>(`/v1/jobs/${jobId}/cancel`, {});
   }
 
-  async function f_create_job_safe(jobConfig: CreateJobConfig) {
+  /**
+   * @throws {UhmbrellaAssertError}
+   */
+  async function f_create_job_safe(jobConfig: JobConfig) {
 
     const response = await f_create_job(jobConfig);
     f_assertJobCreateResponse(response);
 
     return response;
   }
+
+  /**
+ * @throws {UhmbrellaAssertError}
+ */
   async function f_job_status_safe(jobId: string): Promise<JobStatusResponse> {
     const response = await http.get(`/v1/jobs/${jobId}/status`, {});
     f_assertJobStatusResponse(response);
     return response;
   }
+
+  /**
+   * @throws {UhmbrellaAssertError}
+   */
   async function f_job_results_safe(jobId: string): Promise<JobResultsResponse> {
 
     const response = await http.get(`/v1/jobs/${jobId}/results`, {});
     f_assertJobResultResponse(response);
     return response;
   }
+
+
   return {
     create: f_create_job,
     createSafe: f_create_job_safe,

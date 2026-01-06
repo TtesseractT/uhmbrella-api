@@ -7,7 +7,7 @@ import { createJobsApi } from "../jobs";
 import { UhmbrellaClientConfigResolved, UhmbrellaClientConfig, UhmbrellaSDK } from "../types/clientConfig";
 import { createUsageApi } from "../usage";
 import { f_isStringValidHttpUrl } from "../utils";
-import { UhmbrellaClientError } from "./error";
+import { UhmbrellaSDKConfigError } from "./error";
 
 /**
  * @function createUhmbrellaClient - Creates the Uhmbrella API SDK client.
@@ -50,7 +50,7 @@ async function createUhmbrellaClientSafe(config: UhmbrellaClientConfig): Promise
     f_resolveClientConfig(config);
 
     if (!(await isFetchCompatible(config.f_fetch))) {
-      throw new UhmbrellaClientError({
+      throw new UhmbrellaSDKConfigError({
         message: "Provided fetch is not WHATWG-compatible"
       });
     }
@@ -84,12 +84,12 @@ function f_resolveClientConfig(
 ): asserts config is UhmbrellaClientConfigResolved {
 
   if (!config.api_key || config.api_key.length != 21) {
-    throw new UhmbrellaClientError({
+    throw new UhmbrellaSDKConfigError({
       message: "API key is required, required length is 21. e.g.: UHM-XXXXX-XXXXX-XXXXX"
     });
   }
   if (!config.api_key.startsWith('UHM-')) {
-    throw new UhmbrellaClientError({
+    throw new UhmbrellaSDKConfigError({
       message: "Invalid API key format, must start with UHM-"
     });
   }
@@ -102,25 +102,25 @@ function f_resolveClientConfig(
   config.jobs.chunk_size ??= DEFAULT_CHUNK_SIZE;
 
   if (!f_isStringValidHttpUrl(config.base_url)) {
-    throw new UhmbrellaClientError({ message: "Invalid base_url" });
+    throw new UhmbrellaSDKConfigError({ message: "Invalid base_url" });
   }
 
   if (typeof config.f_fetch !== "function") {
-    throw new UhmbrellaClientError({ message: "Invalid f_fetch" });
+    throw new UhmbrellaSDKConfigError({ message: "Invalid f_fetch" });
   }
   if (!Number.isFinite(config.jobs.chunk_size)) {
-    throw new UhmbrellaClientError({
+    throw new UhmbrellaSDKConfigError({
       message: "chunk_size must be a finite integer"
     });
   }
   if (config.jobs.chunk_size > MAX_CHUNK_SIZE) {
-    throw new UhmbrellaClientError({
+    throw new UhmbrellaSDKConfigError({
       message: `chunk_size cannot exceed ${MAX_CHUNK_SIZE / 1024 / 1024} MB`
     });
   }
 
   if (config.jobs.chunk_size < 1024 * 1024) {
-    throw new UhmbrellaClientError({
+    throw new UhmbrellaSDKConfigError({
       message: "chunk_size cannot be smaller than 1 MB"
     });
   }
@@ -128,7 +128,7 @@ function f_resolveClientConfig(
   assertNumber(config.request_options.timeout_ms, "config.request_options.timeout_ms");
   if (config.request_options.timeout_ms < 0) {
 
-    throw new UhmbrellaClientError({
+    throw new UhmbrellaSDKConfigError({
       message: `config.timeout_ms must be not a negative integer, got ${config.request_options.timeout_ms}`
     });
   }

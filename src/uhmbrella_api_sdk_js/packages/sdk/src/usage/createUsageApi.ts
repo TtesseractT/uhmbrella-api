@@ -10,6 +10,9 @@ const createUsageApi = (httpClient: HttpClient) => {
     return httpClient.get<UsageInfo>("/usage", {}, { timeout_ms: options?.timeout_ms });
   }
 
+  /**
+   * @throws {UhmbrellaAssertError}
+   */
   function f_get_usage_safe(options?: RequestOptions): Promise<UsageInfo> {
 
     const response = httpClient.get<UsageInfo>('/usage', {}, { timeout_ms: options?.timeout_ms });

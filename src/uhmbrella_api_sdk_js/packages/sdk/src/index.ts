@@ -12,13 +12,13 @@ export type {
   JobProgressCallback,
   JobResultsResponse,
   JobStatusResponse,
-  CreateJobConfig,
-  CreateJobOptions,
+  JobConfig,
+  JobOptions,
   JobCancelResponse
 } from "./types/";
 
 // errors
 export { UhmbrellaSDKError } from "./error"
 export { ApiError } from "./http/errors"
-export { UhmbrellaClientError } from "./client/"
-
+export { UhmbrellaSDKConfigError } from "./client/"
+export { UhmbrellaAssertError } from "./asserts/";

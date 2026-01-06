@@ -2,7 +2,7 @@ import type {
   AnalyzeBatchResponse,
   AnalyzeFileInput,
   AnalyzeOptions,
-  CreateJobConfig,
+  JobConfig,
   JobCancelResponse,
   JobCreateResponse,
   JobResultsResponse,
@@ -15,7 +15,8 @@ import type {
 import {
   createUhmbrellaClientSafe,
   UhmbrellaSDKError,
-  UhmbrellaClientError,
+  UhmbrellaSDKConfigError,
+  UhmbrellaAssertError,
   ApiError,
 } from "@uhmbrella/sdk";
 
@@ -57,17 +58,25 @@ async function main() {
 
     /**
          * Below is how you use the Jobs API.
+         *
          * Scanning a directory, loading the files into a buffer.
+         * If some audio files aren't able to be read, it returns the errors.
+         * Check the length of files before procediing.
          * */
-    const files: AudioFile[] = loadAudioFilesFromDirectory('./', { recursive: false });
+    const { files, errors } = loadAudioFilesFromDirectory('./', { recursive: false });
+    console.log(errors);
 
-    /*Or load a single file*/
-    const { file, file_name } = loadAudio('./audio.mp3');
+
+    /*
+     * Or load a single file
+     * loadAudio throws UhmbrellaReadError.
+     * */
+    // const { file, file_name } = loadAudio('./audio.mp3');
 
     /**
     * creating a job object with a callback function which will be called inside the jobs.create() function whenever a chunk or a file has been uploaded.
     * */
-    const job_input: CreateJobConfig = {
+    const job_input: JobConfig = {
       files,
       options: {
         onProgress: (sent, total) => {
@@ -78,16 +87,16 @@ async function main() {
       }
     }
 
-    // const job: JobCreateResponse = await client.jobs.createSafe(job_input);
-    // console.log("Job Created: ", job);
+    const job: JobCreateResponse = await client.jobs.createSafe(job_input);
+    console.log("Job Created: ", job);
     //
-    // const job_status = await client.jobs.status("c03810c1-222e-4325-a408-24138364399f");
+    // const job_status = await client.jobs.status(job.job_id);
     // console.log("Job status: ", JSON.stringify(job_status));
     //
-    const job_result: JobResultsResponse = await client.jobs.resultsSafe("c03810c1-222e-4325-a408-24138364399f");
+    // const job_result: JobResultsResponse = await client.jobs.resultsSafe(job.job_id);
     // const job_cancel: JobCancelResponse = await client.jobs.cancel(job.job_id);
     //
-    console.log("Job Result: ", JSON.stringify(job_result));
+    // console.log("Job Result: ", JSON.stringify(job_result));
     // console.log("Job cancel response: ", JSON.stringify(job_cancel));
 
     /**

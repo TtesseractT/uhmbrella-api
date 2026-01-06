@@ -1,4 +1,4 @@
 import { createUhmbrellaClient, createUhmbrellaClientSafe } from "./createClient"
-import { UhmbrellaClientError } from "./error";
+import { UhmbrellaSDKConfigError } from "./error";
 
-export { createUhmbrellaClient, createUhmbrellaClientSafe, UhmbrellaClientError };
+export { createUhmbrellaClient, createUhmbrellaClientSafe, UhmbrellaSDKConfigError };

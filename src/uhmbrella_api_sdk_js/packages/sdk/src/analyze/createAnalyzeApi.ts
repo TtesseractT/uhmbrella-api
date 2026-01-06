@@ -60,6 +60,9 @@ const createAnalyzeApi = (httpClient: HttpClient) => {
     return f_analyze_File(arg1, options);
   }
 
+  /**
+   * @throws {UhmbrellaAssertError}
+   */
   async function f_analyzeSafe(file: Blob | File, options?: AnalyzeOptions): Promise<AnalyzeResult>;
   async function f_analyzeSafe(files: AnalyzeFileInput[], options?: AnalyzeOptions): Promise<AnalyzeBatchResponse>;
   async function f_analyzeSafe(arg1: Blob | File | AnalyzeFileInput[], options?: AnalyzeOptions): Promise<AnalyzeBatchResponse | AnalyzeResult> {

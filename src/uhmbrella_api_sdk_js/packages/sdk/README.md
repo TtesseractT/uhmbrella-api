@@ -36,12 +36,16 @@ import { createUhmbrellaClientSafe } from "@uhmbrella/sdk";
 
 const client = await createUhmbrellaClientSafe({
   api_key: process.env.API_KEY!,
-//base_url: "",
-//jobs: {
-//  chunk_size: 20 * 1024 * 1024 // default is 50 * 1024 * 1024
-// }
-//f_fetch:  // You can use your own fetch library, but it has to conform to the WHATWG Fetch API. It should also return the Response object.
-
+      // base_url: "",
+      jobs: {
+        chunk_size: 20 * 1024 * 1024,
+        // chunk_upload_timeout: 60000,
+        // onProgress: 
+      },
+      // request_options: {
+      //   timeout_ms: 30000
+      // }
+      // f_fetch: 
 });
 ```
 
@@ -73,7 +77,7 @@ createUhmbrellaClient(config);
 
 Both variants validate the API key format at runtime.
 
-### Jobs API (Recommended for large uploads)
+### Jobs API 
 
 The Jobs API supports:
 
@@ -85,7 +89,7 @@ The Jobs API supports:
 
 - Chunked uploads
 
-#### Node.js example (directory upload)
+#### Node.js example 
 
 ```TypeScript
 import { createUhmbrellaClientSafe } from "@uhmbrella/sdk";
@@ -101,9 +105,13 @@ const files = loadAudioFilesFromDirectory("./audio", {
 
 const job = await client.jobs.create({
   files,
-  onProgress(sent, total) {
-    console.log(`Upload: ${Math.round((sent / total) * 100)}%`);
-  }
+      options: {
+        onProgress: (sent, total) => {
+          console.log(`upload progress update: ${Math.round((sent / total) * 100)}%`);
+        },
+        // chunk_size:
+        // chunk_upload_timeout: 100
+      }
 });
 
 console.log("Job created:", job.job_id);
@@ -131,7 +139,7 @@ const result = await client.jobs.cancel(job.job_id);
 
 ```
 
-### Synchronous Analyze API (Small files only)
+### Synchronous Analyze API
 
 The synchronous API is intended for:
 
@@ -147,7 +155,7 @@ The synchronous API is intended for:
 const result = await client.analyze.analyze(file, "audio.mp3");
 ```
 
-#### Multiple files (limited)
+#### Multiple files 
 
 ```TypeScript
 const result = await client.analyze.analyze(files);

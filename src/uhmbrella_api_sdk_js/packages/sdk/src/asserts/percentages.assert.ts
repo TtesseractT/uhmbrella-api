@@ -1,6 +1,6 @@
 import { MUSIC_CLASSES } from "../constants";
 import { Percentages } from "../types/analyze";
-import { assertObject, assertNumber, assertMusicClass } from "./assert-helpers";
+import { assertObject, assertNumber, assertMusicClass, assertFloatRange } from "./assert-helpers";
 
 export function assertPercentagesStrict(value: unknown, name: string): asserts value is Percentages {
 
@@ -11,9 +11,8 @@ export function assertPercentagesStrict(value: unknown, name: string): asserts v
 
     assertNumber(v, `${name}.${key}`);
 
-    if (v < 0 || v > 100) {
-      throw new Error(`Expected ${name}.${key} to be between 0 and 100`);
-    }
+    assertFloatRange(v, `${name}.${key}`, 0, 100);
+
   }
 
   for (const key of Object.keys(value)) {
@@ -26,11 +25,10 @@ export function assertPercentages(value: unknown, name: string): asserts value i
   assertObject(value, name);
 
   for (const key of MUSIC_CLASSES) {
-    assertNumber(value[key], `${name}.${key}`);
+    const v = value[key];
 
-    if (value[key] < 0 || value[key] > 100) {
-      throw new Error(`Expected ${name}.${key} to be between 0 and 100`);
-    }
+    assertNumber(v, `${name}.${key}`);
+    assertFloatRange(v, `${name}.${key}`, 0, 100);
 
   }
 }

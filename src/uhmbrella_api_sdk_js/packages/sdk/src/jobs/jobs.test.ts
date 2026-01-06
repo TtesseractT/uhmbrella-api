@@ -1,7 +1,7 @@
 import { describe, expect, expectTypeOf, it, vi } from "vitest";
 import { createUhmbrellaClient } from "../client";
 import { tests } from "../tests";
-import { CreateJobConfig, JobCreateResponse } from "../types";
+import { JobConfig, JobCreateResponse } from "../types";
 import { createHttpClient } from "../http";
 import { HttpClient } from "../http/createHttpClient";
 import { DEFAULT_CHUNK_SIZE, MAX_CHUNK_SIZE } from "../constants";
@@ -238,7 +238,7 @@ interface TestConfig {
 
 async function f_create_job(
   http: HttpClient,
-  jobConfig: CreateJobConfig,
+  jobConfig: JobConfig,
   testConfig?: TestConfig
 ): Promise<JobCreateResponse> {
   const { files } = jobConfig;

@@ -2,7 +2,7 @@ import { createAnalyzeApi } from "../analyze";
 import { createUhmbrellaClient } from "../client";
 import { createJobsApi } from "../jobs";
 import { createUsageApi } from "../usage";
-import { CreateJobOptions } from "./jobs";
+import { JobOptions } from "./jobs";
 
 export type RequestOptions = {
   /**
@@ -25,7 +25,7 @@ export type UhmbrellaClientConfig = {
    */
   base_url?: string;
 
-  jobs?: CreateJobOptions;
+  jobs?: JobOptions;
 
   request_options?: RequestOptions;
   /**
