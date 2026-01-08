@@ -1,18 +1,14 @@
 import { assertUsageInfo } from "../asserts";
 import { HttpClient } from "../http/createHttpClient";
-import { RequestOptions, UsageInfo } from "../types";
+import { RequestOptions, UsageInfo } from "../shared/";
+import { UsageApi } from "./usage";
 
-
-
-const createUsageApi = (httpClient: HttpClient) => {
+export function createUsageApi(httpClient: HttpClient): UsageApi {
 
   function f_get_usage(options?: RequestOptions): Promise<UsageInfo> {
     return httpClient.get<UsageInfo>("/usage", {}, { timeout_ms: options?.timeout_ms });
   }
 
-  /**
-   * @throws {UhmbrellaAssertError}
-   */
   function f_get_usage_safe(options?: RequestOptions): Promise<UsageInfo> {
 
     const response = httpClient.get<UsageInfo>('/usage', {}, { timeout_ms: options?.timeout_ms });
@@ -23,4 +19,3 @@ const createUsageApi = (httpClient: HttpClient) => {
 
 }
 
-export { createUsageApi };

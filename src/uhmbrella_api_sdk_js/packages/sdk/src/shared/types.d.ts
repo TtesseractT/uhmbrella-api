@@ -1,6 +1,14 @@
-import { MUSIC_CLASSES } from "../constants.js";
-import { RequestOptions } from "./clientConfig.js";
-import type { UsageInfo } from "./usage.js";
+import { PLAN_NAMES } from "./constants";
+
+export type PlanName = typeof PLAN_NAMES[number];
+
+export type UsageInfo = {
+  user_id: string;
+  plan_name: PlanName;
+  quota_seconds: number;
+  used_seconds: number;
+  remaining_seconds: number;
+};
 
 export type MusicClass = typeof MUSIC_CLASSES[number];
 
@@ -28,20 +36,10 @@ export type AnalyzeResult = {
   billed_seconds: number;
 };
 
-export type AnalyzeBatchResponse = {
-  total_files: number;
-  total_audio_seconds: number;
-  total_billed_seconds: number;
-  results: AnalyzeResult[];
-  usage: UsageInfo;
-};
-
-export type AnalyzeFileInput = {
-  file: Blob | File;
-  file_name?: string;
-};
-
-export type AnalyzeOptions = RequestOptions & {
-  file_name?: string;
+export type RequestOptions = {
+  /**
+  * Defaults to 30000 ms.
+  */
+  timeout_ms?: number;
 };
 

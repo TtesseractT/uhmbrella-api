@@ -1,16 +1,12 @@
 import { assertAnalyzeResult } from "../asserts";
-import { MAX_CHUNK_SIZE, MAX_SYNC_FILES } from "../constants";
-import { UhmbrellaSDKError } from "../error";
+import { MAX_CHUNK_SIZE, MAX_SYNC_FILES, UhmbrellaSDKError, AnalyzeResult } from "../shared";
 import { HttpClient } from "../http/createHttpClient";
-import { AnalyzeFileInput, AnalyzeOptions, AnalyzeBatchResponse, AnalyzeResult } from "../types/";
-import { f_getTotalBytes } from "../utils";
+import { AnalyzeFileInput, AnalyzeOptions, AnalyzeBatchResponse, AnalyzeApi } from "./analyze.d";
 import { f_resolveAnalyzeBatchResponse } from "./analyze.assert";
+import { f_getTotalBytes } from "../shared/utils";
 
-const createAnalyzeApi = (httpClient: HttpClient) => {
+const createAnalyzeApi = (httpClient: HttpClient): AnalyzeApi => {
 
-  /**
- * @returns AnalyzeResponse 
- * */
   function f_analyze_File(file: Blob | File, options?: AnalyzeOptions): Promise<AnalyzeResult> {
     if (f_getTotalBytes([{ file }]) > MAX_CHUNK_SIZE) {
       throw new UhmbrellaSDKError({ name: "Max size exeeded", message: `file ${options?.file_name ?? ''} is bigger than the ${(MAX_CHUNK_SIZE / 1024) / 1024} MB limit. Use jobs.create .` });
@@ -49,24 +45,33 @@ const createAnalyzeApi = (httpClient: HttpClient) => {
 
   function f_analyze(file: Blob | File, options?: AnalyzeOptions): Promise<AnalyzeResult>;
 
-  function f_analyze(files: AnalyzeFileInput[], options?: AnalyzeOptions): Promise<AnalyzeBatchResponse>;
+  function f_analyze(files: AnalyzeFileInput[], options?: AnalyzeOptions): Promise<AnalyzeBatchResponse | AnalyzeResult>;
 
   function f_analyze(arg1: Blob | File | AnalyzeFileInput[], options: AnalyzeOptions = {}): Promise<AnalyzeBatchResponse | AnalyzeResult> {
 
-    if (Array.isArray(arg1)) {
-      return f_analyze_Batch(arg1, options);
+    if ((Array.isArray(arg1) && arg1.length == 0) || !arg1) {
+      throw new UhmbrellaSDKError({ name: "Invalid arguement", message: "No files received" });
     }
 
-    return f_analyze_File(arg1, options);
+    const res = Array.isArray(arg1)
+      ? arg1.length === 1
+        ? f_analyze_File(arg1[0]!.file, { file_name: arg1[0]!.file_name, ...options })
+        : f_analyze_Batch(arg1, { timeout_ms: options?.timeout_ms })
+      : f_analyze_File(arg1, options);
+
+    return res;
+
   }
 
-  /**
-   * @throws {UhmbrellaAssertError}
-   */
   async function f_analyzeSafe(file: Blob | File, options?: AnalyzeOptions): Promise<AnalyzeResult>;
-  async function f_analyzeSafe(files: AnalyzeFileInput[], options?: AnalyzeOptions): Promise<AnalyzeBatchResponse>;
+  async function f_analyzeSafe(files: AnalyzeFileInput[], options?: AnalyzeOptions): Promise<AnalyzeBatchResponse | AnalyzeResult>;
   async function f_analyzeSafe(arg1: Blob | File | AnalyzeFileInput[], options?: AnalyzeOptions): Promise<AnalyzeBatchResponse | AnalyzeResult> {
+
     const expectBatch = Array.isArray(arg1);
+
+    if ((expectBatch && arg1.length == 0) || !arg1) {
+      throw new UhmbrellaSDKError({ name: "Invalid arguement", message: "No files received" });
+    }
 
     const res = expectBatch
       ? arg1.length === 1

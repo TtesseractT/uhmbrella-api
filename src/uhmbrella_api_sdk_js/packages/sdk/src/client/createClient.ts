@@ -1,22 +1,16 @@
+import { UhmbrellaSDK } from ".";
 import { createAnalyzeApi } from "../analyze";
 import { assertNumber } from "../asserts";
-import { DEFAULT_CHUNK_SIZE, DEFAULT_TIMEOUT_MS, DEFAULT_URL, MAX_CHUNK_SIZE } from "../constants";
+import { DEFAULT_CHUNK_SIZE, DEFAULT_TIMEOUT_MS, DEFAULT_URL, MAX_CHUNK_SIZE } from "../shared";
 import { ApiError, createHttpClient } from "../http";
 import { HttpClient } from "../http/createHttpClient";
 import { createJobsApi } from "../jobs";
-import { UhmbrellaClientConfigResolved, UhmbrellaClientConfig, UhmbrellaSDK } from "../types/clientConfig";
+import { UhmbrellaClientConfigResolved, UhmbrellaClientConfig } from "./client";
 import { createUsageApi } from "../usage";
-import { f_isStringValidHttpUrl } from "../utils";
 import { UhmbrellaSDKConfigError } from "./error";
+import { f_isStringValidHttpUrl } from "../shared/utils";
 
-/**
- * @function createUhmbrellaClient - Creates the Uhmbrella API SDK client.
- * @param {UhmbrellaClientConfig} config
- * @returns {UhmbrellaSDK} - Returns a client, call UhmbrellaSDK.usage.usage() to check if key is valid.
- *
- * Validates the config using assertion.
- */
-function createUhmbrellaClient(config: UhmbrellaClientConfig): UhmbrellaSDK {
+export function createUhmbrellaClient(config: UhmbrellaClientConfig): UhmbrellaSDK {
 
   f_resolveClientConfig(config);
 
@@ -35,15 +29,8 @@ function createUhmbrellaClient(config: UhmbrellaClientConfig): UhmbrellaSDK {
   };
 }
 
-/**
- * @function createUhmbrellaClient - Creates the Uhmbrella API SDK client.
- * @param {UhmbrellaClientConfig} config
- * @returns {Promise<UhmbrellaSDK>} - Returns a safe, ready to use client.
- *
- * Validates the config using assertion.
- * Calls the Usage API to verify if the provided API key belongs to a valid User or not.
- */
-async function createUhmbrellaClientSafe(config: UhmbrellaClientConfig): Promise<UhmbrellaSDK> {
+
+export async function createUhmbrellaClientSafe(config: UhmbrellaClientConfig): Promise<UhmbrellaSDK> {
   let httpClient: HttpClient;
 
   try {
@@ -149,5 +136,4 @@ async function isFetchCompatible(
   }
 }
 
-export { createUhmbrellaClient, createUhmbrellaClientSafe }
 

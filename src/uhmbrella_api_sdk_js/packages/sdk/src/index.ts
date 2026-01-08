@@ -1,24 +1,14 @@
-export { createUhmbrellaClient, createUhmbrellaClientSafe } from "./client";
+export * from "./client/";
+export * from "./analyze/";
+export * from "./jobs/";
+export * from "./usage/";
 
-export type {
-  UhmbrellaSDK,
-  UhmbrellaClientConfig,
-  UsageInfo,
-  AnalyzeResult,
-  AnalyzeBatchResponse,
-  AnalyzeOptions,
-  AnalyzeFileInput,
-  JobCreateResponse,
-  JobProgressCallback,
-  JobResultsResponse,
-  JobStatusResponse,
-  JobConfig,
-  JobOptions,
-  JobCancelResponse
-} from "./types/";
-
+export type { createUhmbrellaClient, createUhmbrellaClientSafe } from "./client/client.d";
 // errors
-export { UhmbrellaSDKError } from "./error"
-export { ApiError } from "./http/errors"
-export { UhmbrellaSDKConfigError } from "./client/"
+export { UhmbrellaSDKError, AnalyzeResult, PlanName, DEFAULT_CHUNK_SIZE, DEFAULT_TIMEOUT_MS, MAX_CHUNK_SIZE, MAX_SYNC_FILES, MusicClass, UsageInfo } from "./shared"
+export { ApiError } from "./http"
 export { UhmbrellaAssertError } from "./asserts/";
+
+
+
+

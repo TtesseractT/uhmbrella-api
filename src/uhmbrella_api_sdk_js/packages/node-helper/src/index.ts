@@ -1,4 +1,4 @@
-
-export { loadAudioFilesFromDirectory } from "./LoadAudioFromDir.js"
+export * from "./error.js";
 export * from "./LoadAudio.js";
-export type { LoadAudioFilesOptions, AudioFile } from "./types/index.ts"
+export * from "./LoadAudioFromDir.js";
+export type { AudioFile, LoadAudioFilesOptions, loadAudio, loadAudioFilesFromDirectory } from "./types/index.d.ts";

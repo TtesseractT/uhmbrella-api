@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { assertSegment, assertSegments } from "../segments.assert";
-import { MUSIC_CLASSES } from "../../constants";
+import { MUSIC_CLASSES } from "../../shared/constants";
 
 
 describe("assertSegment", () => {

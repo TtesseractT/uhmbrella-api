@@ -1,8 +1,8 @@
 import { describe, expect, expectTypeOf, it } from "vitest";
 import { createUhmbrellaClient, createUhmbrellaClientSafe } from "./createClient";
-import { UhmbrellaSDK } from "../types";
+import { UhmbrellaSDK } from ".";
 import { tests } from "../tests";
-import { PLAN_NAMES } from "../constants";
+import { PLAN_NAMES } from "../shared/constants";
 
 
 describe("Client creation tests", () => {

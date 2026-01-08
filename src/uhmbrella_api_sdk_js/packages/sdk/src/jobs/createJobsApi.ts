@@ -1,12 +1,10 @@
-import { UhmbrellaAssertError } from "../asserts";
-import { DEFAULT_CHUNK_SIZE, MAX_CHUNK_SIZE } from "../constants";
-import { UhmbrellaSDKError } from "../error";
+import { DEFAULT_CHUNK_SIZE, MAX_CHUNK_SIZE, UhmbrellaSDKError } from "../shared";
+import { f_getTotalBytes, f_chunkBlob } from "../shared/utils";
 import type { HttpClient } from "../http/createHttpClient";
-import { JobConfig, JobCancelResponse, JobCreateResponse, JobResultsResponse, JobStatusResponse } from "../types";
-import { f_getTotalBytes, f_chunkBlob } from "../utils";
+import { JobConfig, JobCancelResponse, JobCreateResponse, JobResultsResponse, JobStatusResponse, JobsApi } from "./jobs.d";
 import { f_assertJobCreateResponse, f_assertJobResultResponse, f_assertJobStatusResponse } from "./jobs.assert";
 
-export function createJobsApi(http: HttpClient, chunkSize: number = DEFAULT_CHUNK_SIZE) {
+export function createJobsApi(http: HttpClient, chunkSize: number = DEFAULT_CHUNK_SIZE): JobsApi {
 
 
   async function f_create_job(jobConfig: JobConfig): Promise<JobCreateResponse> {
@@ -80,9 +78,6 @@ export function createJobsApi(http: HttpClient, chunkSize: number = DEFAULT_CHUN
     return http.post<JobCancelResponse>(`/v1/jobs/${jobId}/cancel`, {});
   }
 
-  /**
-   * @throws {UhmbrellaAssertError}
-   */
   async function f_create_job_safe(jobConfig: JobConfig) {
 
     const response = await f_create_job(jobConfig);
@@ -91,18 +86,12 @@ export function createJobsApi(http: HttpClient, chunkSize: number = DEFAULT_CHUN
     return response;
   }
 
-  /**
- * @throws {UhmbrellaAssertError}
- */
   async function f_job_status_safe(jobId: string): Promise<JobStatusResponse> {
     const response = await http.get(`/v1/jobs/${jobId}/status`, {});
     f_assertJobStatusResponse(response);
     return response;
   }
 
-  /**
-   * @throws {UhmbrellaAssertError}
-   */
   async function f_job_results_safe(jobId: string): Promise<JobResultsResponse> {
 
     const response = await http.get(`/v1/jobs/${jobId}/results`, {});

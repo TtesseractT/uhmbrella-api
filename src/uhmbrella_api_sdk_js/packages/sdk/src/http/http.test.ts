@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { createHttpClient } from "./createHttpClient";
 import { tests } from "../tests";
-import { DEFAULT_URL } from "../constants";
+import { DEFAULT_URL } from "../shared";
 
 
 describe("HTTP request tests", () => {

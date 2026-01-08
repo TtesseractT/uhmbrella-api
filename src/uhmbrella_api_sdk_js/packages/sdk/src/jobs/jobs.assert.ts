@@ -1,7 +1,7 @@
 import { assertAnalyzeResult, assertArray, assertNumber, assertObject, assertOneOf, assertString } from "../asserts";
-import { J_STATUS } from "../constants";
-import { AnalyzeResult, JobCreateResponse, JobResultsResponse, JobStatusResponse, JobStatus } from "../types";
-
+import { AnalyzeResult } from "../shared";
+import { J_STATUS } from "../shared/constants";
+import { JobCreateResponse, JobResultsResponse, JobStatusResponse, JobStatus } from ".";
 
 export function f_assertJobCreateResponse(response: unknown): asserts response is JobCreateResponse {
 

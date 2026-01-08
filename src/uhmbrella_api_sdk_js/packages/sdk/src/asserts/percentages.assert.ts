@@ -1,5 +1,5 @@
-import { MUSIC_CLASSES } from "../constants";
-import { Percentages } from "../types/analyze";
+import { MUSIC_CLASSES } from "../shared/constants"
+import { Percentages } from "../shared/types.d";
 import { assertObject, assertNumber, assertMusicClass, assertFloatRange } from "./assert-helpers";
 
 export function assertPercentagesStrict(value: unknown, name: string): asserts value is Percentages {

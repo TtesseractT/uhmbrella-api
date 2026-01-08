@@ -1,7 +1,7 @@
 import { describe, expect, expectTypeOf, it } from "vitest";
-import { createUhmbrellaClient } from "../client";
+import { createUhmbrellaClient } from "../client/createClient";
 import { tests } from "../tests";
-import { AnalyzeResult } from "../types";
+import { AnalyzeResult } from "../shared";
 
 describe("Analyze tests", () => {
 

@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { LoadAudioFilesOptions, AudioFile } from "./types/index.js";
+import type { LoadAudioFilesOptions, AudioFile } from "./index.d.ts";
 import { UhmbrellaReadError } from "./error.js";
 
 const DEFAULT_AUDIO_EXTENSIONS = new Set([
@@ -12,14 +12,6 @@ const DEFAULT_AUDIO_EXTENSIONS = new Set([
   ".ogg"
 ]);
 
-
-/**
- * Loads audio files from a directory.
- *
- * - Continues on unreadable files or directories
- * - Returns successfully loaded files and diagnostics
- * - Does NOT throw for per-file errors
- */
 export function loadAudioFilesFromDirectory(dirPath: string, options: LoadAudioFilesOptions = {}): {
   files: AudioFile[];
   errors: UhmbrellaReadError[];

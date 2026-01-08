@@ -1,4 +1,4 @@
-import { RequestOptions } from "../types";
+import { RequestOptions } from "../shared";
 import { ApiError } from "./errors";
 
 export type HttpClientConfig = {

@@ -189,11 +189,14 @@ import { loadAudio } from "@uhmbrella/sdk-node";
 
 const { file, file_name } = loadAudio("./audio.mp3");
 await client.analyze.analyze(file, file_name);
+```
 
-Directory loading (Node.js)
+#### Directory loading (Node.js)
+
+```TypeScript
 import { loadAudioFilesFromDirectory } from "@uhmbrella/sdk-node";
 
-const files = loadAudioFilesFromDirectory("./audio", {
+const {files, errors} = loadAudioFilesFromDirectory("./audio", {
   recursive: true
 });
 ```
@@ -201,7 +204,7 @@ const files = loadAudioFilesFromDirectory("./audio", {
 ### Usage & Quota
 
 ```TypeScript
-const usage = await client.usage.getUsage();
+const usage: UsageInfo  = await client.usage.getUsage();
 console.log(usage);
 ```
 
@@ -225,7 +228,9 @@ try {
 
 - UhmbrellaSDKError – client-side validation / limits
 
-- UhmbrellaClientError - client-configuration validation errors
+- UhmbrellaSDKConfigError - client-configuration validation errors
+
+- UhmbrellaAssertError - client side validation errors thrown when Safe variants of the API are used.
 
 - ApiError – API response errors (4xx / 5xx)
 

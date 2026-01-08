@@ -1,4 +1,4 @@
-import { UhmbrellaSDKError } from "../error";
+import { UhmbrellaSDKError } from "../shared";
 
 export type ApiErrorParams = {
   status: number;

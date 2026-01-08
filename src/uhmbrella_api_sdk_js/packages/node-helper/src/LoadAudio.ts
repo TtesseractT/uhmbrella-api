@@ -1,7 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { AudioFile } from "./types/index.js";
-import { UhmbrellaSDKError } from "@uhmbrella/sdk";
+import type { AudioFile } from "./types/index.d.ts";
 import { UhmbrellaReadError } from "./error.js";
 
 export function loadAudio(filePath: string): AudioFile {
