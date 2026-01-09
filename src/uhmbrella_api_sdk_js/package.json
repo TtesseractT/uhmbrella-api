@@ -5,6 +5,7 @@
   "scripts": {
     "build": "pnpm -r build",
     "clean": "pnpm -r clean",
+    "test:sdk": "pnpm --filter @uhmbrella/sdk test",
     "playground" : "pnpm --filter uhmbrella-playground" 
   }
 }

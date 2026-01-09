@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
-import { LoadAudioFilesOptions, AudioFile } from "./types/index.js";
+import type { LoadAudioFilesOptions, AudioFile } from "./index.d.ts";
+import { UhmbrellaReadError } from "./error.js";
 
 const DEFAULT_AUDIO_EXTENSIONS = new Set([
   ".mp3",
@@ -11,12 +12,10 @@ const DEFAULT_AUDIO_EXTENSIONS = new Set([
   ".ogg"
 ]);
 
-
-
-/**
- * Load audio files from a directory and return SDK-ready File objects.
- */
-export function loadAudioFilesFromDirectory(dirPath: string, options: LoadAudioFilesOptions = {}): AudioFile[] {
+export function loadAudioFilesFromDirectory(dirPath: string, options: LoadAudioFilesOptions = {}): {
+  files: AudioFile[];
+  errors: UhmbrellaReadError[];
+} {
 
   const { recursive = false,
     extensions = Array.from(DEFAULT_AUDIO_EXTENSIONS) } = options;
@@ -27,10 +26,22 @@ export function loadAudioFilesFromDirectory(dirPath: string, options: LoadAudioF
     )
   );
 
-  const results: AudioFile[] = [];
+  const files: AudioFile[] = [];
+  const errors: UhmbrellaReadError[] = [];
 
   function walk(currentPath: string) {
-    const entries = fs.readdirSync(currentPath, { withFileTypes: true });
+    let entries: fs.Dirent[];
+
+    try {
+      entries = fs.readdirSync(currentPath, { withFileTypes: true });
+    } catch (e) {
+      errors.push(new UhmbrellaReadError({
+        kind: "readdir",
+        path: currentPath,
+        error: e as NodeJS.ErrnoException,
+      }));
+      return;
+    }
 
     for (const entry of entries) {
       const fullPath = path.join(currentPath, entry.name);
@@ -47,17 +58,24 @@ export function loadAudioFilesFromDirectory(dirPath: string, options: LoadAudioF
       const ext = path.extname(entry.name).toLowerCase();
       if (!extSet.has(ext)) continue;
 
-      const buffer = fs.readFileSync(fullPath);
+      try {
+        const buffer = fs.readFileSync(fullPath);
+        const file = new File([buffer], entry.name, {
+          type: "application/octet-stream",
+        });
 
-      const file = new File([buffer], entry.name, { type: "application/octet-stream" });
-
-      results.push({
-        file, file_name: entry.name
-      });
+        files.push({ file, file_name: entry.name });
+      } catch (e) {
+        errors.push(new UhmbrellaReadError({
+          kind: "readfile",
+          path: fullPath,
+          error: e as NodeJS.ErrnoException,
+        }));
+      }
     }
   }
 
   walk(dirPath);
-  return results;
-}
 
+  return { files, errors };
+}

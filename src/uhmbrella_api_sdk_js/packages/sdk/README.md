@@ -2,7 +2,7 @@
 
 [Uhmbrella Homepage](https://home.uhmbrella.io/api)
 
-Uhmbrella AIMD TypeScript SDK for detecting AI-generated audio.
+Uhmbrella AIMD TypeScript SDK for detecting AI-generated music.
 The SDK is platform-agnostic and works in:
 
 - Browsers
@@ -13,8 +13,6 @@ The SDK is platform-agnostic and works in:
 
 - Bun
 
-- Edge / Workers
-
 It provides first-class TypeScript support, a clean API surface, and an explicit separation between synchronous analysis and async, job-based uploads with progress tracking.
 
 ## Installation
@@ -23,7 +21,7 @@ It provides first-class TypeScript support, a clean API surface, and an explicit
 npm install @uhmbrella/sdk
 ```
 
-For Node.js helpers (filesystem support):
+For Node.js and Bun helpers (filesystem support):
 
 ```bash
 npm install @uhmbrella/sdk-node
@@ -36,12 +34,16 @@ import { createUhmbrellaClientSafe } from "@uhmbrella/sdk";
 
 const client = await createUhmbrellaClientSafe({
   api_key: process.env.API_KEY!,
-//base_url: "",
-//jobs: {
-//  chunk_size: 20 * 1024 * 1024 // default is 50 * 1024 * 1024
-// }
-//f_fetch:  // You can use your own fetch library, but it has to conform to the WHATWG Fetch API. It should also return the Response object.
-
+      // base_url: "",
+      jobs: {
+        chunk_size: 20 * 1024 * 1024,
+        // chunk_upload_timeout: 60000,
+        // onProgress: 
+      },
+      // request_options: {
+      //   timeout_ms: 30000
+      // }
+      // f_fetch: 
 });
 ```
 
@@ -73,7 +75,7 @@ createUhmbrellaClient(config);
 
 Both variants validate the API key format at runtime.
 
-### Jobs API (Recommended for large uploads)
+### Jobs API 
 
 The Jobs API supports:
 
@@ -85,7 +87,7 @@ The Jobs API supports:
 
 - Chunked uploads
 
-#### Node.js example (directory upload)
+#### Node.js example 
 
 ```TypeScript
 import { createUhmbrellaClientSafe } from "@uhmbrella/sdk";
@@ -101,9 +103,13 @@ const files = loadAudioFilesFromDirectory("./audio", {
 
 const job = await client.jobs.create({
   files,
-  onProgress(sent, total) {
-    console.log(`Upload: ${Math.round((sent / total) * 100)}%`);
-  }
+      options: {
+        onProgress: (sent, total) => {
+          console.log(`upload progress update: ${Math.round((sent / total) * 100)}%`);
+        },
+        // chunk_size:
+        // chunk_upload_timeout: 100
+      }
 });
 
 console.log("Job created:", job.job_id);
@@ -131,7 +137,7 @@ const result = await client.jobs.cancel(job.job_id);
 
 ```
 
-### Synchronous Analyze API (Small files only)
+### Synchronous Analyze API
 
 The synchronous API is intended for:
 
@@ -147,7 +153,7 @@ The synchronous API is intended for:
 const result = await client.analyze.analyze(file, "audio.mp3");
 ```
 
-#### Multiple files (limited)
+#### Multiple files 
 
 ```TypeScript
 const result = await client.analyze.analyze(files);
@@ -181,11 +187,14 @@ import { loadAudio } from "@uhmbrella/sdk-node";
 
 const { file, file_name } = loadAudio("./audio.mp3");
 await client.analyze.analyze(file, file_name);
+```
 
-Directory loading (Node.js)
+#### Directory loading (Node.js)
+
+```TypeScript
 import { loadAudioFilesFromDirectory } from "@uhmbrella/sdk-node";
 
-const files = loadAudioFilesFromDirectory("./audio", {
+const {files, errors} = loadAudioFilesFromDirectory("./audio", {
   recursive: true
 });
 ```
@@ -193,7 +202,7 @@ const files = loadAudioFilesFromDirectory("./audio", {
 ### Usage & Quota
 
 ```TypeScript
-const usage = await client.usage.getUsage();
+const usage: UsageInfo  = await client.usage.getUsage();
 console.log(usage);
 ```
 
@@ -217,7 +226,9 @@ try {
 
 - UhmbrellaSDKError – client-side validation / limits
 
-- UhmbrellaClientError - client-configuration validation errors
+- UhmbrellaSDKConfigError - client-configuration validation errors
+
+- UhmbrellaAssertError - client side validation errors thrown when Safe variants of the API are used.
 
 - ApiError – API response errors (4xx / 5xx)
 
@@ -246,9 +257,7 @@ createUhmbrellaClient({
 
 - No fs in core SDK
 
-- Explicit progress semantics using JobProgressCallback function 
-
-- Jobs own chunking & progress
+- Jobs own chunking & progress semantics using JobProgressCallback function 
 
 ## License
 

@@ -1,9 +1,10 @@
-import { UhmbrellaSDKError } from "../error";
+import { UhmbrellaSDKError } from "../shared";
 
 export type ApiErrorParams = {
   status: number;
   message: string;
   body?: unknown;
+  name?: string;
 };
 
 export class ApiError extends UhmbrellaSDKError {
@@ -12,7 +13,7 @@ export class ApiError extends UhmbrellaSDKError {
 
   constructor(params: ApiErrorParams) {
     super({ message: params.message, name: "API Error" });
-    this.name = "ApiError";
+    this.name = params.name ?? "ApiError";
     this.status = params.status;
     this.body = params.body;
   }

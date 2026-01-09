@@ -1,22 +1,34 @@
-import { DEFAULT_CHUNK_SIZE, MAX_CHUNK_SIZE } from "../constants";
-import type { HttpClient } from "../http/createHttpClient";
-import { CreateJobInput, JobCancelResponse, JobCreateResponse, JobResultsResponse, JobStatusResponse } from "../types";
-import { f_getTotalBytes, f_chunkBlob } from "../utils";
+import { DEFAULT_CHUNK_SIZE, MAX_CHUNK_SIZE, UhmbrellaSDKError, f_getTotalBytes, f_chunkBlob } from "../shared";
+import type { HttpClient } from "../http";
+import { JobConfig, JobCancelResponse, JobCreateResponse, JobResultsResponse, JobStatusResponse, JobsApi } from "./jobs.d";
+import { f_assertJobCreateResponse, f_assertJobResultResponse, f_assertJobStatusResponse } from "./jobs.assert";
 
-export function createJobsApi(http: HttpClient, chunkSize: number = DEFAULT_CHUNK_SIZE) {
+export function createJobsApi(http: HttpClient, chunkSize: number = DEFAULT_CHUNK_SIZE): JobsApi {
 
 
-  async function f_create_job(jobInput: CreateJobInput): Promise<JobCreateResponse> {
+  async function f_create_job(jobConfig: JobConfig): Promise<JobCreateResponse> {
     const {
       files,
-      onProgress,
-      chunk_size = chunkSize
-    } = jobInput;
+    } = jobConfig;
 
+    if (!files || files.length == 0) {
+      throw new UhmbrellaSDKError({ name: "Invalid arguement", message: "No files received" });
+    }
+    const onProgress = jobConfig.options?.onProgress;
+    const chunk_size = jobConfig.options?.chunk_size ?? chunkSize;
+    const chunk_upload_timeout = jobConfig.options?.chunk_upload_timeout;
 
     const r_chunk_size = chunk_size > MAX_CHUNK_SIZE ? MAX_CHUNK_SIZE : chunk_size;
 
     const init = await http.post<{ job_id: string }>("/v1/jobs/init", {});
+
+    if (!init.job_id) {
+      throw new UhmbrellaSDKError({
+        name: "ApiError",
+        message: "jobs.init did not return job_id"
+      });
+    }
+
     const jobId = init.job_id;
 
     const totalBytes = f_getTotalBytes(files);
@@ -38,7 +50,8 @@ export function createJobsApi(http: HttpClient, chunkSize: number = DEFAULT_CHUN
               total: String(totalChunks)
             }
           ),
-          { body: chunk }
+          { body: chunk },
+          { timeout_ms: chunk_upload_timeout }
         );
 
         sentBytes += chunk.size;
@@ -63,10 +76,39 @@ export function createJobsApi(http: HttpClient, chunkSize: number = DEFAULT_CHUN
 
     return http.post<JobCancelResponse>(`/v1/jobs/${jobId}/cancel`, {});
   }
+
+  async function f_create_job_safe(jobConfig: JobConfig) {
+
+    const response = await f_create_job(jobConfig);
+    f_assertJobCreateResponse(response);
+
+    return response;
+  }
+
+  async function f_job_status_safe(jobId: string): Promise<JobStatusResponse> {
+    const response = await http.get(`/v1/jobs/${jobId}/status`, {});
+    f_assertJobStatusResponse(response);
+    return response;
+  }
+
+  async function f_job_results_safe(jobId: string): Promise<JobResultsResponse> {
+
+    const response = await http.get(`/v1/jobs/${jobId}/results`, {});
+    f_assertJobResultResponse(response);
+    return response;
+  }
+
+
   return {
     create: f_create_job,
+    createSafe: f_create_job_safe,
+
     status: f_job_status,
+    statusSafe: f_job_status_safe,
+
     results: f_job_results,
+    resultsSafe: f_job_results_safe,
+
     cancel: f_cancel_job
   };
 }

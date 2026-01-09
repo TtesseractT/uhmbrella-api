@@ -1,43 +1,43 @@
 import type {
-  AnalyzeResponse,
-  CreateJobInput,
+  AnalyzeBatchResponse,
+  AnalyzeFileInput,
+  AnalyzeOptions,
+  JobConfig,
   JobCancelResponse,
   JobCreateResponse,
   JobResultsResponse,
   UhmbrellaClientConfig,
   UsageInfo,
   UhmbrellaSDK,
+  AnalyzeResult,
 } from "@uhmbrella/sdk";
 
 import {
   createUhmbrellaClientSafe,
   UhmbrellaSDKError,
-  UhmbrellaClientError,
+  UhmbrellaSDKConfigError,
+  UhmbrellaAssertError,
   ApiError,
+  DEFAULT_CHUNK_SIZE,
 } from "@uhmbrella/sdk";
 
 import { loadAudio, loadAudioFilesFromDirectory, type AudioFile } from "@uhmbrella/sdk-node";
 import "dotenv/config";
 
-/**
- * In other runtimes you can feed a buffer to a File object and pass that to the analyzeFile function.
- * const file = new File(
- * [buffer],
- * path.basename(filePath),
- * { type: "audio/mpeg" }
- *);
- * And in browser code you can create a blob and do the same.
- * */
 async function main() {
   try {
 
-    /*Creating the Uhmbrella Client with config options*/
     const config: UhmbrellaClientConfig = {
       api_key: process.env.API_KEY!,
       // base_url: "",
       jobs: {
-        chunk_size: 20 * 1024 * 1024
-      }
+        chunk_size: DEFAULT_CHUNK_SIZE,
+        // chunk_upload_timeout: 60000,
+        // onProgress: 
+      },
+      // request_options: {
+      //   timeout_ms: 30000
+      // }
       // f_fetch:  // You can use your own fetch library, but it has to conform to the WHATWG Fetch API. It should also return the Response object.
     }
 
@@ -48,36 +48,41 @@ async function main() {
     const client: UhmbrellaSDK = await createUhmbrellaClientSafe(config);
 
     /**
-         * Below is how you use the Jobs API.
-         * Scanning a directory, loading the files into a buffer.
-         * */
-    const files: AudioFile[] = loadAudioFilesFromDirectory('./', { recursive: false });
+     * Scanning a directory, loading the files into a buffer.
+     * If some audio files aren't able to be read, it returns the errors.
+     * Check the length of files before procediing.
+   * */
+    const { files, errors } = loadAudioFilesFromDirectory('./', { recursive: false });
+    console.log(errors);
 
-    /*Or load a single file*/
+
+    /*
+     * Or load a single file
+     * */
     // const { file, file_name } = loadAudio('./audio.mp3');
 
-    /**
-    * creating a job object with a callback function which will be called inside the jobs.create() function whenever a chunk or a file has been uploaded.
-    * */
-    const job_input: CreateJobInput = {
+    const job_input: JobConfig = {
       files,
-      onProgress(sent, total) {
-        console.log(`upload progress update: ${Math.round((sent / total) * 100)}%`);
-      },
-      // chunk_size: 20 * 1024 * 1024
+      options: {
+        onProgress: (sent, total) => {
+          console.log(`upload progress update: ${Math.round((sent / total) * 100)}%`);
+        },
+        // chunk_size:
+        // chunk_upload_timeout: 10000
+      }
     }
 
-    const job: JobCreateResponse = await client.jobs.create(job_input);
+    const job: JobCreateResponse = await client.jobs.createSafe(job_input);
     console.log("Job Created: ", job);
-
-    const job_status = await client.jobs.status(job.job_id);
-    console.log("Job status: ", JSON.stringify(job_status));
-
-    const job_result: JobResultsResponse = await client.jobs.results(job.job_id);
-    const job_cancel: JobCancelResponse = await client.jobs.cancel(job.job_id);
-
+    //
+    // const job_status = await client.jobs.status(job.job_id);
+    // console.log("Job status: ", JSON.stringify(job_status));
+    //
+    const job_result: JobResultsResponse = await client.jobs.resultsSafe(job.job_id);
+    // const job_cancel: JobCancelResponse = await client.jobs.cancel(job.job_id);
+    //
     console.log("Job Result: ", JSON.stringify(job_result));
-    console.log("Job cancel response: ", JSON.stringify(job_cancel));
+    // console.log("Job cancel response: ", JSON.stringify(job_cancel));
 
     /**
      * Getting usage info
@@ -88,8 +93,10 @@ async function main() {
     /**
      * Synchrnous API
      * */
-    // const result: AnalyzeResponse = await client.analyze.analyze(file, file_name);
-    // const result: AnalyzeResponse = await client.analyze.analyze(files);
+
+    // client.analyze.analyze
+    // const result: AnalyzeResult = await client.analyze.analyze(file, { file_name, timeout_ms: 30000 });
+    // const result = await client.analyze.analyzeSafe(files, { timeout_ms: 30000 });
     // console.log(result);
 
 
