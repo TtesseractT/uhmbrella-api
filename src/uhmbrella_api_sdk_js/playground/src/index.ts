@@ -68,7 +68,7 @@ async function main() {
           console.log(`upload progress update: ${Math.round((sent / total) * 100)}%`);
         },
         // chunk_size:
-        // chunk_upload_timeout: 100
+        // chunk_upload_timeout: 10000
       }
     }
 

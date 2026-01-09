@@ -2,10 +2,8 @@ import { describe, expect, expectTypeOf, it, vi } from "vitest";
 import { createUhmbrellaClient } from "../client/createClient";
 import { tests } from "../tests";
 import { JobConfig, JobCreateResponse } from ".";
-import { createHttpClient } from "../http";
-import { HttpClient } from "../http/createHttpClient";
-import { DEFAULT_CHUNK_SIZE, MAX_CHUNK_SIZE, UhmbrellaSDKError } from "../shared";
-import { f_getTotalBytes, f_chunkBlob } from "../shared/utils";
+import { createHttpClient, type HttpClient } from "../http";
+import { DEFAULT_CHUNK_SIZE, MAX_CHUNK_SIZE, UhmbrellaSDKError, f_getTotalBytes, f_chunkBlob } from "../shared";
 
 describe("Jobs API testing", () => {
   const fetchInitWithoutJobId = tests.createMockFetch([

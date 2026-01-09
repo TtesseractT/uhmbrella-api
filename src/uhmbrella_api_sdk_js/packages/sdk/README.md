@@ -2,7 +2,7 @@
 
 [Uhmbrella Homepage](https://home.uhmbrella.io/api)
 
-Uhmbrella AIMD TypeScript SDK for detecting AI-generated audio.
+Uhmbrella AIMD TypeScript SDK for detecting AI-generated music.
 The SDK is platform-agnostic and works in:
 
 - Browsers
@@ -13,8 +13,6 @@ The SDK is platform-agnostic and works in:
 
 - Bun
 
-- Edge / Workers
-
 It provides first-class TypeScript support, a clean API surface, and an explicit separation between synchronous analysis and async, job-based uploads with progress tracking.
 
 ## Installation
@@ -23,7 +21,7 @@ It provides first-class TypeScript support, a clean API surface, and an explicit
 npm install @uhmbrella/sdk
 ```
 
-For Node.js helpers (filesystem support):
+For Node.js and Bun helpers (filesystem support):
 
 ```bash
 npm install @uhmbrella/sdk-node
@@ -259,9 +257,7 @@ createUhmbrellaClient({
 
 - No fs in core SDK
 
-- Explicit progress semantics using JobProgressCallback function 
-
-- Jobs own chunking & progress
+- Jobs own chunking & progress semantics using JobProgressCallback function 
 
 ## License
 

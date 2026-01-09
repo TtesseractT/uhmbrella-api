@@ -1,5 +1,5 @@
 import { assertUsageInfo } from "../asserts";
-import { HttpClient } from "../http/createHttpClient";
+import { type HttpClient } from "../http";
 import { RequestOptions, UsageInfo } from "../shared/";
 import { UsageApi } from "./usage";
 

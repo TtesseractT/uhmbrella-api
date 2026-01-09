@@ -1,14 +1,12 @@
 import { UhmbrellaSDK } from ".";
 import { createAnalyzeApi } from "../analyze";
 import { assertNumber } from "../asserts";
-import { DEFAULT_CHUNK_SIZE, DEFAULT_TIMEOUT_MS, DEFAULT_URL, MAX_CHUNK_SIZE } from "../shared";
-import { ApiError, createHttpClient } from "../http";
-import { HttpClient } from "../http/createHttpClient";
+import { DEFAULT_CHUNK_SIZE, DEFAULT_TIMEOUT_MS, DEFAULT_URL, MAX_CHUNK_SIZE, f_isStringValidHttpUrl } from "../shared";
+import { ApiError, createHttpClient, type HttpClient } from "../http";
 import { createJobsApi } from "../jobs";
 import { UhmbrellaClientConfigResolved, UhmbrellaClientConfig } from "./client";
 import { createUsageApi } from "../usage";
 import { UhmbrellaSDKConfigError } from "./error";
-import { f_isStringValidHttpUrl } from "../shared/utils";
 
 export function createUhmbrellaClient(config: UhmbrellaClientConfig): UhmbrellaSDK {
 

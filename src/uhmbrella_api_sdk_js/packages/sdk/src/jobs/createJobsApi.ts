@@ -1,6 +1,5 @@
-import { DEFAULT_CHUNK_SIZE, MAX_CHUNK_SIZE, UhmbrellaSDKError } from "../shared";
-import { f_getTotalBytes, f_chunkBlob } from "../shared/utils";
-import type { HttpClient } from "../http/createHttpClient";
+import { DEFAULT_CHUNK_SIZE, MAX_CHUNK_SIZE, UhmbrellaSDKError, f_getTotalBytes, f_chunkBlob } from "../shared";
+import type { HttpClient } from "../http";
 import { JobConfig, JobCancelResponse, JobCreateResponse, JobResultsResponse, JobStatusResponse, JobsApi } from "./jobs.d";
 import { f_assertJobCreateResponse, f_assertJobResultResponse, f_assertJobStatusResponse } from "./jobs.assert";
 

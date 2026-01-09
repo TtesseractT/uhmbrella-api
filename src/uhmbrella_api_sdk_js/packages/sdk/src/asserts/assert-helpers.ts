@@ -1,5 +1,4 @@
-import { MUSIC_CLASSES } from "../shared/constants";
-import { MusicClass } from "../shared/";
+import { type MusicClass, MUSIC_CLASSES } from "../shared/";
 import { UhmbrellaAssertError } from "./error";
 
 

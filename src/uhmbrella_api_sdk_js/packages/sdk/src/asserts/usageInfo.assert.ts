@@ -1,5 +1,4 @@
-import { PLAN_NAMES } from "../shared/constants"
-import { UsageInfo } from "../shared";
+import { type UsageInfo, PLAN_NAMES } from "../shared";
 import { assertObject, assertString, assertOneOf, assertNumber } from "./assert-helpers";
 
 export function assertUsageInfo(value: unknown): asserts value is UsageInfo {

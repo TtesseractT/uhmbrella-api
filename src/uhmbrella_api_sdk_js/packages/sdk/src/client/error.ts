@@ -1,4 +1,4 @@
-import { UhmbrellaSDKError } from "../shared/error";
+import { UhmbrellaSDKError } from "../shared";
 
 export type UhmbrellaSDKConfigErrorParams = {
   message: string;

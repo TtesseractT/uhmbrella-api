@@ -1,4 +1,4 @@
-import { Segment } from "../shared/types.d";
+import { Segment } from "../shared";
 import { assertObject, assertMusicClass, assertNumber, assertFloatRange, assertArray } from "./assert-helpers";
 
 export function assertSegment(object: unknown, name: string = 'segment'): asserts object is Segment {

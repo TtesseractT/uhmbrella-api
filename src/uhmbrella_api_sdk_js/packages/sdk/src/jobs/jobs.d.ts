@@ -1,6 +1,5 @@
-import { RequestOptions, UsageInfo, AnalyzeResult } from "../shared";
+import { type RequestOptions, type UsageInfo, type AnalyzeResult, J_STATUS } from "../shared";
 import { UhmbrellaAssertError } from "../asserts";
-import { J_STATUS } from "../shared/constants";
 
 
 export type JobProgressCallback = (sent: number, total: number) => void;
@@ -15,6 +14,10 @@ export type JobConfig = {
 };
 
 export type JobOptions = {
+
+  /**
+   * invoked when the job is created and after every chunk upload.
+   */
   onProgress?: JobProgressCallback;
 
   /**

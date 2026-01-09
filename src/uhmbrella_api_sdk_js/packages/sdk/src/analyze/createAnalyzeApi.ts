@@ -1,9 +1,8 @@
 import { assertAnalyzeResult } from "../asserts";
-import { MAX_CHUNK_SIZE, MAX_SYNC_FILES, UhmbrellaSDKError, AnalyzeResult } from "../shared";
-import { HttpClient } from "../http/createHttpClient";
+import { MAX_CHUNK_SIZE, MAX_SYNC_FILES, UhmbrellaSDKError, type AnalyzeResult, f_getTotalBytes } from "../shared";
+import { type HttpClient } from "../http";
 import { AnalyzeFileInput, AnalyzeOptions, AnalyzeBatchResponse, AnalyzeApi } from "./analyze.d";
 import { f_resolveAnalyzeBatchResponse } from "./analyze.assert";
-import { f_getTotalBytes } from "../shared/utils";
 
 const createAnalyzeApi = (httpClient: HttpClient): AnalyzeApi => {
 

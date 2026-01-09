@@ -1,14 +1,8 @@
 import { RequestOptions } from "../shared";
 import { ApiError } from "./errors";
+import { HttpClientConfig } from "./http";
 
-export type HttpClientConfig = {
-  api_key: string;
-  base_url: string;
-  timeout_ms: number;
-  f_fetch?: typeof fetch;
-};
 
-export type HttpClient = ReturnType<typeof createHttpClient>;
 
 export const createHttpClient = (clientConfig: HttpClientConfig) => {
 

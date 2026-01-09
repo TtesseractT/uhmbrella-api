@@ -1,7 +1,8 @@
-import { AnalyzeApi, } from "../analyze/analyze.d";
-import { JobsApi } from "../jobs/jobs.d";
-import { UsageApi } from "../usage/usage.d";
+import { AnalyzeApi, } from "../analyze/";
+import { JobsApi } from "../jobs/";
+import { UsageApi } from "../usage/";
 import { JobOptions } from "../jobs/";
+
 export interface UhmbrellaSDK {
   usage: UsageApi,
 

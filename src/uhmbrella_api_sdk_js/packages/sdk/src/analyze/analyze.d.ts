@@ -1,7 +1,4 @@
-import { MUSIC_CLASSES } from "../shared/constants";
-import { RequestOptions } from "../shared";
-import type { UsageInfo } from "../shared";
-
+import { type UsageInfo, type RequestOptions, MUSIC_CLASSES } from "../shared";
 
 
 export type AnalyzeBatchResponse = {

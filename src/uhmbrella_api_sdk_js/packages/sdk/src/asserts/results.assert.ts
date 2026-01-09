@@ -1,4 +1,4 @@
-import { AnalyzeResult } from "../shared";
+import { type AnalyzeResult } from "../shared";
 import { assertObject, assertString, assertNumber, assertArray } from "./assert-helpers";
 import { assertPercentages } from "./percentages.assert";
 import { assertSegments } from "./segments.assert";

@@ -17,7 +17,7 @@ npm init
 npm install @uhmbrella/sdk
 ```
 
-- (Optional) For node.js runtime, you can also get the node-helper package:
+- (Optional) For node.js and bun runtime, you can also get the node-helper package:
 
 ```
 npm install @uhmbrella/sdk-node
