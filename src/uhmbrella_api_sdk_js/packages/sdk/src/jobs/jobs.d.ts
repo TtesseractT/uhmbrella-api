@@ -71,16 +71,16 @@ type ExactPartialRecord<K extends PropertyKey, V> =
 export interface JobsApi {
   /**
    * @function createSafe - creates a job with the set params.
-   * @param {JobConfig} jobConfig - The job config options {@link JobConfig}.
-   * @returns {Promise<JobCreateResponse>} Returns a Promise which resolves to {@link JobCreateResponse}.
+   * @param {JobConfig} jobConfig - The job config options JobConfig.
+   * @returns {Promise<JobCreateResponse>} Returns a Promise which resolves to JobCreateResponse.
    */
   create(jobConfig: JobConfig): Promise<JobCreateResponse>;
   /**
    * @function createSafe - creates a job with the set params.
-   * @param {JobConfig} jobConfig - The job config options {@link JobConfig}.
-   * @returns {Promise<JobCreateResponse>} Returns a Promise which resolves to {@link JobCreateResponse}.
-   * @throws An {@link UhmbrellaAssertError} - When the response json body is not type of {@link JobCreateResponse}.
-   * @throws An {@link UhmbrellaSDKError} - For invalid arguements or errors when creating the job.
+   * @param {JobConfig} jobConfig - The job config options JobConfig.
+   * @returns {Promise<JobCreateResponse>} Returns a Promise which resolves to JobCreateResponse.
+   * @throws An UhmbrellaAssertError - When the response json body is not type of JobCreateResponse.
+   * @throws An UhmbrellaSDKError - For invalid arguements or errors when creating the job.
    */
   createSafe(jobConfig: JobConfig): Promise<JobCreateResponse>;
 
@@ -88,14 +88,14 @@ export interface JobsApi {
   /**
     * @function status - fetch the status of a job
     * @param {string} jobId
-    * @returns {Promise<JobStatusResponse>} - possible values of status : {@link JobStatus}.
+    * @returns {Promise<JobStatusResponse>} - possible values of status : JobStatus.
     */
   status(jobId: string): Promise<JobStatusResponse>;
   /**
     * @function statusSafe - fetch the status of a job with assertions on the response body.
     * @param {string} jobId
-    * @returns {Promise<JobStatusResponse>} - returns a promise which resolves to a {@link JobStatusResponse}. Possible values of status : {@link JobStatus}.
-    * @throws {UhmbrellaAssertError} - Throws an {@link UhmbrellaAssertError} if the returned response body is not in the format of JobStatusResponse.
+    * @returns {Promise<JobStatusResponse>} - returns a promise which resolves to a JobStatusResponse. Possible values of status : JobStatus.
+    * @throws {UhmbrellaAssertError} - Throws an UhmbrellaAssertError if the returned response body is not in the format of JobStatusResponse.
     */
   statusSafe(jobId: string): Promise<JobStatusResponse>;
 
@@ -103,14 +103,14 @@ export interface JobsApi {
   /**
    * @function results - fetch the results of a job.
    * @param {string} jobId
-   * @returns {Promise<JobResultsResponse>} - returns a {@link JobResultsResponse} containing a results array, each element is an object with filename, status, error key value pairs and a result property which is {@link AnalyzeResult} 
+   * @returns {Promise<JobResultsResponse>} - returns a JobResultsResponse containing a results array, each element is an object with filename, status, error key value pairs and a result property which is AnalyzeResult 
    */
   results(jobId: string): Promise<JobResultsResponse>;
   /**
  * @function resultsSafe - fetch the results of a job with assertions on the response body.
  * @param {string} jobId
- * @returns {Promise<JobResultsResponse>} - returns a promise which resolves to a {@link JobResultsResponse} containing a results array, each element is an object with filename, status, error key value pairs and a result property which is {@link AnalyzeResult}
- * @throws {UhmbrellaAssertError} - Throws an {@link UhmbrellaAssertError} if the returned response body is not in the format of JobResultsResponse.
+ * @returns {Promise<JobResultsResponse>} - returns a promise which resolves to a JobResultsResponse containing a results array, each element is an object with filename, status, error key value pairs and a result property which is AnalyzeResult
+ * @throws {UhmbrellaAssertError} - Throws an UhmbrellaAssertError if the returned response body is not in the format of JobResultsResponse.
  */
   resultsSafe(jobId: string): Promise<JobResultsResponse>;
 
@@ -118,7 +118,7 @@ export interface JobsApi {
   /**
    * @function cancel - cancels a job if the job associated with the jobId is still queued or processing.
    * @param {string} jobId
-   * @returns {Promise<JobCancelResponse>} - returns a promise which resolves to a {@link JobCancelResponse}
+   * @returns {Promise<JobCancelResponse>} - returns a promise which resolves to a JobCancelResponse
    */
   cancel(jobId: string): Promise<JobCancelResponse>;
 }

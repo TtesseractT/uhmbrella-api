@@ -13,11 +13,11 @@ export type AudioFile = {
  * @param filePath
  * Absolute or relative path to the audio file.
  *
- * @returns An {@link AudioFile} object containing:
+ * @returns An AudioFile object containing:
  * - `file`: A `File` instance backed by the file’s contents
  * - `file_name`: The basename of the provided path
  *
- * @throws An {@link UhmbrellaReadError}
+ * @throws An UhmbrellaReadError
  * when the file cannot be read from disk.
  *
  * @example
@@ -37,15 +37,15 @@ export function loadAudio(filePath: string): AudioFile;
  * @function loadAudioFilesFromDirectory
  * @param dirPath - Absolute or relative path to the directory to scan.
  *
- * @param options - {@link LoadAudioFilesOptions}
+ * @param options - LoadAudioFilesOptions
  * Optional configuration controlling traversal behavior.
  *
  * Defaults to:
  * `[".mp3", ".wav", ".flac", ".m4a", ".aac", ".ogg"]`
  *
  * @returns An object containing:
- * - `files`: {@link AudioFile}[] Successfully loaded audio files
- * - `errors`:{@link UhmbrellaReadError}[] Diagnostics for any read or traversal failures
+ * - `files`: AudioFile[] Successfully loaded audio files
+ * - `errors`:UhmbrellaReadError[] Diagnostics for any read or traversal failures
  *
  * @example
  * ```ts

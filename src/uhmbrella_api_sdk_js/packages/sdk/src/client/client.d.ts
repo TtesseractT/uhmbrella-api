@@ -10,7 +10,7 @@ export interface UhmbrellaSDK {
    * Synchronous audio analysis API.
    *
    * Provides audio analysis for small payloads.
-   * For larger workloads or chunked uploads, use {@link JobsApi}.
+   * For larger workloads or chunked uploads, use jobs.
    */
   analyze: AnalyzeApi,
 
@@ -24,11 +24,11 @@ export interface UhmbrellaSDK {
 
 /**
 * @function createUhmbrellaClientSafe - Creates the Uhmbrella API SDK client. It calls the usage API to verify if the provided API key belongs to a valid user or not.
-* @param {UhmbrellaClientConfig} config - {@link UhmbrellaClientConfig}
+* @param {UhmbrellaClientConfig} config - UhmbrellaClientConfig
 *
-* @throws an {@link UhmbrellaSDKConfigError} if the configuration is invalid or inconsistent.
+* @throws an UhmbrellaSDKConfigError if the configuration is invalid or inconsistent.
 * 
-* @returns an {@link UhmbrellaSDK}. Returns a Promise which resolves into a safe, ready to use client.
+* @returns an UhmbrellaSDK. Returns a Promise which resolves into a safe, ready to use client.
 *
 * Validates the config using assertions.
 * Calls the Usage API to verify if the provided API key belongs to a valid User or not.
@@ -38,13 +38,11 @@ export function createUhmbrellaClientSafe(config: UhmbrellaClientConfig): Promis
 /**
  * @function createUhmbrellaClient - Creates the Uhmbrella API SDK client.
  *
- * @param {UhmbrellaClientConfig} config - {@link UhmbrellaClientConfig}
+ * @param {UhmbrellaClientConfig} config - UhmbrellaClientConfig
  *
- * @throws an {@link UhmbrellaSDKConfigError}
+ * @throws an UhmbrellaSDKConfigError. Thrown if the configuration is invalid or inconsistent.
  * 
- * Thrown if the configuration is invalid or inconsistent.
- * 
- * @returns an {@link UhmbrellaSDK}. Returns a client, call UhmbrellaSDK.usage.usage() to check if key is valid.
+ * @returns an UhmbrellaSDK, the client. Call UhmbrellaSDK.usage.usage() to check if key is valid.
  *
  * Validates the config using assertion.
  */

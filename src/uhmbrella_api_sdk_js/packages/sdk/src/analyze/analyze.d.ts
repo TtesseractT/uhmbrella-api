@@ -21,10 +21,10 @@ export type AnalyzeOptions = RequestOptions & {
 export interface AnalyzeFn {
   /**
     * Analyze a single audio file.
-   * @param {Blob | File } file -  File size must not exceed {@link MAX_CHUNK_SIZE}
-   * @param {AnalyzeOptions?} [options] - {@link AnalyzeOptions} 
-   * @returns {(Promise<AnalyzeResult>)} Returns a Promise which resolves to either {@link AnalyzeResult}.
-   * @throws {UhmbrellaSDKError} - Throws an {@link UhmbrellaSDKError} for request constraint violations, network failures.
+   * @param {Blob | File } file -  File size must not exceed  MAX_CHUNK_SIZE
+   * @param {AnalyzeOptions?} [options] - AnalyzeOptions
+   * @returns {(Promise<AnalyzeResult>)} Returns a Promise which resolves to AnalyzeResult
+   * @throws {UhmbrellaSDKError} - Throws an UhmbrellaSDKError for request constraint violations, network failures.
    * @example
    * ```ts
     * const result = await clienti.analyze.analyze(file);
@@ -38,12 +38,12 @@ export interface AnalyzeFn {
 
   /**
    * Analyze multiple audio files in a single request.
-   * @param {AnalyzeFileInput[]} files - Array<{@link AnalyzeFileInput}
-   * - Maximum number of files: {@link MAX_SYNC_FILES}
-   * - Combined payload size must not exceed {@link MAX_CHUNK_SIZE} 
-   * @param {AnalyzeOptions?} [options] - {@link AnalyzeOptions} 
-   * @returns {(Promise<AnalyzeResult>|Promise<AnalyzeBatchResponse>)} Returns a Promise which resolves to either {@link AnalyzeResult} for one file, or {@link AnalyzeBatchResponse} for multiple files.
-   * @throws {UhmbrellaSDKError} - Throws an {@link UhmbrellaSDKError} for request constraint violations, network failures, or server contract mismatches.
+   * @param {AnalyzeFileInput[]} files - Array<AnalyzeFileInput>
+   * - Maximum number of files: MAX_SYNC_FILES
+   * - Combined payload size must not exceed MAX_CHUNK_SIZE
+   * @param {AnalyzeOptions?} [options] - AnalyzeOptions
+   * @returns {(Promise<AnalyzeResult>|Promise<AnalyzeBatchResponse>)} Returns a Promise which resolves to either AnalyzeResult for one file, or AnalyzeBatchResponse for multiple files.
+   * @throws {UhmbrellaSDKError} - Throws an UhmbrellaSDKError for request constraint violations, network failures, or server contract mismatches.
     * @example
   * ```ts
     * const batch = await client.analyze([
@@ -64,11 +64,11 @@ export interface AnalyzeSafeFn {
   /**
    * Analyze a single audio file.
    * @param {Blob | File } file 
-   * - File size must not exceed {@link MAX_CHUNK_SIZE}
-   * @param {AnalyzeOptions?} [options] - {@link AnalyzeOptions} 
-   * @returns {(Promise<AnalyzeResult>)} Returns a Promise which resolves to either {@link AnalyzeResult}.
-   * @throws {UhmbrellaAssertError} -  Throws an {@link UhmbrellaAssertError} if the response recieved is not {@link AnalyzeBatchResponse}.
-   * @throws {UhmbrellaSDKError} - Throws an {@link UhmbrellaSDKError} for request constraint violations, network failures, or server contract mismatches.
+   * - File size must not exceed MAX_CHUNK_SIZE
+   * @param {AnalyzeOptions?} [options] - AnalyzeOptions
+   * @returns {(Promise<AnalyzeResult>)} Returns a Promise which resolves to either AnalyzeResult.
+   * @throws {UhmbrellaAssertError} -  Throws an UhmbrellaAssertError if the response recieved is not AnalyzeBatchResponse.
+   * @throws {UhmbrellaSDKError} - Throws an UhmbrellaSDKError for request constraint violations, network failures, or server contract mismatches.
    */
   (
     file: Blob | File,
@@ -77,13 +77,13 @@ export interface AnalyzeSafeFn {
 
   /**
    * Analyze multiple audio files in a single request.
-   * @param {AnalyzeFileInput[]} files - Array<{@link AnalyzeFileInput}
-   * - Maximum number of files: {@link MAX_SYNC_FILES}
-   * - Combined payload size must not exceed {@link MAX_CHUNK_SIZE} 
-   * @param {AnalyzeOptions?} [options] - {@link AnalyzeOptions} 
-   * @returns {(Promise<AnalyzeResult>|Promise<AnalyzeBatchResponse>)} Returns a Promise which resolves to either {@link AnalyzeResult} for one file, or {@link AnalyzeBatchResponse} for multiple files.
-   * @throws {UhmbrellaAssertError} -  Throws an {@link UhmbrellaAssertError} if the response recieved is not {@link AnalyzeBatchResponse}.
-   * @throws {UhmbrellaSDKError} - Throws an {@link UhmbrellaSDKError} for request constraint violations, network failures, or server contract mismatches.
+   * @param {AnalyzeFileInput[]} files - Array<AnalyzeFileInput>
+   * - Maximum number of files: MAX_SYNC_FILES
+   * - Combined payload size must not exceed MAX_CHUNK_SIZE 
+   * @param {AnalyzeOptions?} [options] - AnalyzeOptions 
+   * @returns {(Promise<AnalyzeResult>|Promise<AnalyzeBatchResponse>)} Returns a Promise which resolves to either AnalyzeResult for one file, or AnalyzeBatchResponse for multiple files.
+   * @throws {UhmbrellaAssertError} -  Throws an UhmbrellaAssertError if the response recieved is not AnalyzeBatchResponse.
+   * @throws {UhmbrellaSDKError} - Throws an UhmbrellaSDKError for request constraint violations, network failures, or server contract mismatches.
    */
   (
     files: AnalyzeFileInput[],
@@ -95,25 +95,25 @@ export interface AnalyzeSafeFn {
  * Synchronous audio analysis API.
  *
  * Provides audio analysis for small payloads.
- * For larger workloads or chunked uploads, use {@link JobsApi}.
+ * For larger workloads or chunked uploads, use JobsApi.
  */
 export interface AnalyzeApi {
   /**
    * Analyze audio files.
-   * For runtime validations and guaranteed AnalyzeResult, use {@link analyzeSafe}
-   * @param {File | Blob | AnalyzeFileInput[]} arg1 - {@link File} or {@link Blob} or Array<{@link AnalyzeFileInput}>
-   * @param {AnalyzeOptions?} [options] - {@link AnalyzeOptions} 
-   * @returns {(Promise<AnalyzeResult>|Promise<AnalyzeBatchResponse>)} Returns a Promise which resolves to either {@link AnalyzeResult} for one file, or {@link AnalyzeBatchResponse} for multiple files.
-   * @throws {UhmbrellaSDKError} - Throws an {@link UhmbrellaSDKError} for request constraint violations, network failures, or server contract mismatches.
+   * For runtime validations and guaranteed AnalyzeResult, use  analyzeSafe
+   * @param {File | Blob | AnalyzeFileInput[]} arg1 - File or Blob or Array<AnalyzeFileInput>
+   * @param {AnalyzeOptions?} [options] - AnalyzeOptions 
+   * @returns {(Promise<AnalyzeResult>|Promise<AnalyzeBatchResponse>)} Returns a Promise which resolves to either AnalyzeResult for one file, or AnalyzeBatchResponse for multiple files.
+   * @throws {UhmbrellaSDKError} - Throws an UhmbrellaSDKError for request constraint violations, network failures, or server contract mismatches.
    */
   analyze: AnalyzeFn;
   /**
    * Analyze audio files with strict runtime validation.
-   * @param {File | Blob | AnalyzeFileInput[]} arg1 - {@link File} or {@link Blob} or Array<{@link AnalyzeFileInput}>
-   * @param {AnalyzeOptions?} [options] - {@link AnalyzeOptions} 
-   * @returns {(Promise<AnalyzeResult>|Promise<AnalyzeBatchResponse>)} Returns a Promise which resolves to either {@link AnalyzeResult} for one file, or {@link AnalyzeBatchResponse} for multiple files.
-   * @throws {UhmbrellaAssertError} -  Throws an {@link UhmbrellaAssertError} if the response recieved is not {@link AnalyzeBatchResponse}.
-   * @throws {UhmbrellaSDKError} - Throws an {@link UhmbrellaSDKError} for request constraint violations, network failures, or server contract mismatches.
+   * @param {File | Blob | AnalyzeFileInput[]} arg1 - File or Blob or Array<AnalyzeFileInput>
+   * @param {AnalyzeOptions?} [options] - AnalyzeOptions 
+   * @returns {(Promise<AnalyzeResult>|Promise<AnalyzeBatchResponse>)} Returns a Promise which resolves to either AnalyzeResult for one file, or AnalyzeBatchResponse for multiple files.
+   * @throws {UhmbrellaAssertError} -  Throws an UhmbrellaAssertError if the response recieved is not AnalyzeBatchResponse.
+   * @throws {UhmbrellaSDKError} - Throws an UhmbrellaSDKError for request constraint violations, network failures, or server contract mismatches.
    */
   analyzeSafe: AnalyzeSafeFn;
 }
